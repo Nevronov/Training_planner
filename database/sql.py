@@ -17,13 +17,15 @@ def insert(con, table, values): # запрос на создание строк�
     if table == 'users':
         a.execute("INSERT INTO users(u_name, u_login, u_password) VALUES (?,?,?)",values)
     elif table == 'workouts':
-        a.execute("INSERT INTO Workouts(w_user, w_time, w_date, w_description) VALUES (?,?,?,?)", values)
+        a.execute("INSERT INTO Workouts(w_user, w_name, w_description, w_date_time) VALUES (?,?,?,?)", values)
     elif table == 'muscle_groups':
         a.execute("INSERT INTO Muscle_groups(m_name) VALUES (?)", values)
     elif table == 'exercises':
-        a.execute("INSERT INTO Exercises(e_name, e_muscle, e_description) VALUES (?,?,?)", values)
+        a.execute("INSERT INTO Exercises(e_name, e_muscle, e_description, e_user) VALUES (?,?,?,?)", values)
     elif table == 'exercises_list':
-        a.execute("INSERT INTO Exercises_list(el_workout, el_exercises, el_number_of_sets) VALUES (?,?,?)", values)
+        a.execute("INSERT INTO Exercises_list(el_workout, el_exercises, el_number_of_sets, el_weight) VALUES (?,?,?,?)", values)
+    elif table == 'weight_logs':
+        a.execute("INSERT INTO Weight_logs(wl_user, wl_weight, wl_date) VALUES (?,?,?)", values)
     con.commit()
 
 def select(con, request,beautiful_select = False): # запрос на вывод строк через запрос select в виде массива строк
@@ -67,7 +69,20 @@ def update(con, table, column, value, additional_condition=''): # обновле
     # value - значение, на которые будут заменены ячейки
     # additional_condition - переменная для дополнительного условия, вроде where
     cursor = con.cursor()
-    cursor.execute(f"update {table} set {column} = {value}\n" + additional_condition)
+    print(f"update {table} set {column} = '{value}'\n" + additional_condition)
+    cursor.execute(f"update {table} set {column} = '{value}'\n" + additional_condition)
     con.commit()
 
+def delete_all_db(con):
+    cursor = con.cursor()
+    cursor.executescript(f"""DELETE FROM Exercises_list;
+                             DELETE FROM Workouts;
+                             DELETE FROM Exercises;
+                             DELETE FROM Users;
+                             DELETE FROM Muscle_groups;
+                             DELETE FROM sqlite_sequence;""")
+    con.commit()
+    print('Отчистка произведена')
+
+delete_all_db(connection())
 print(select(connection(),'select * from users'))

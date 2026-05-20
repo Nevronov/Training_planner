@@ -33,6 +33,7 @@ create table Exercises
   e_id integer primary key autoincrement,
   e_name text not null,
   e_muscle integer references Muscle_groups(m_id) not null,
+  e_user integer references users(u_id) not null,
   e_description text
 );
 
