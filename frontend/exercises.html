@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Упражнения</title>
     <style>
-    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
     body, html {
         margin: 0;
         padding: 0;
@@ -44,7 +43,6 @@
         overflow: hidden;
     }
 
-    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
     nav {
         width: 250px;
         background-color: #ffffff;
@@ -83,7 +81,6 @@
         font-weight: bold;
     }
 
-    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
     main {
         flex-grow: 1;
         padding: 30px;
@@ -93,7 +90,6 @@
         min-height: 0;
     }
 
-    /* ================= СЕКЦИЯ УПРАЖНЕНИЙ ================= */
     .exercises-section {
         background-color: #ffffff;
         border-radius: 15px;
@@ -143,7 +139,6 @@
         font-size: 15px;
     }
 
-    /* Зона со скроллом для списка */
     .exercises-list-container {
         flex-grow: 1;
         overflow-y: auto;
@@ -151,13 +146,11 @@
         min-height: 0;
     }
 
-    /* Кастомный скроллбар */
     .exercises-list-container::-webkit-scrollbar { width: 6px; }
     .exercises-list-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .exercises-list-container::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
     .exercises-list-container::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
 
-    /* Плашка одного упражнения */
     .exercise-item {
         display: flex;
         justify-content: space-between;
@@ -175,11 +168,11 @@
         box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
     }
 
-    /* Строка с названием упражнения и группой мышц */
     .exercise-title-row {
         display: flex;
         align-items: center;
         gap: 15px;
+        flex-wrap: wrap;
     }
 
     .exercise-name {
@@ -188,7 +181,6 @@
         color: #2c3e50;
     }
 
-    /* Кастомный бейдж группы мышц */
     .muscle-badge {
         background-color: #e8f7ff;
         color: #5ab4e6;
@@ -257,7 +249,16 @@
 
                             <div class="exercise-title-row">
                                 <span class="exercise-name">{{ ex.name }}</span>
-                                <span class="muscle-badge">{{ ex.muscle }}</span>
+
+                                {# Обрабатываем случай, когда из бэкенда приходит список мышц (например, ex.muscles) #}
+                                {% if ex.muscles and ex.muscles is iterable and ex.muscles is not string %}
+                                    {% for muscle in ex.muscles %}
+                                        <span class="muscle-badge">{{ muscle }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    {# Резервный вариант на случай, если пришла одиночная строка или старый формат #}
+                                    <span class="muscle-badge">{{ ex.muscle if ex.muscle else 'Не указано' }}</span>
+                                {% endif %}
                             </div>
 
                             <div class="exercise-actions">

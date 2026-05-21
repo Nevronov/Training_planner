@@ -6,7 +6,6 @@
     <title>Профиль</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Базовые стили (такие же, как на главной) */
         body, html {
             margin: 0;
             padding: 0;
@@ -72,7 +71,6 @@
             border-left: 4px solid #84d1fa;
         }
 
-        /* Выделение текущей страницы */
         .nav-button.active {
             background-color: #e8f7ff;
             color: #5ab4e6;
@@ -80,7 +78,6 @@
             font-weight: bold;
         }
 
-        /* Центральный контент (Профиль) */
         main {
             flex: 1;
             padding: 40px;
@@ -100,7 +97,6 @@
             box-sizing: border-box;
         }
 
-        /* Верхний блок: Аватарка + Имя */
         .profile-header {
             display: flex;
             align-items: center;
@@ -131,7 +127,6 @@
             color: #333333;
         }
 
-        /* Блок для контейнера с гистограммой веса */
         .chart-section {
             margin-bottom: 30px;
             padding-bottom: 20px;
@@ -145,7 +140,6 @@
             font-size: 18px;
         }
 
-        /* Форма смены пароля */
         .password-section h3 {
             color: #5ab4e6;
             margin-top: 0;
@@ -172,7 +166,6 @@
             border-color: #5ab4e6;
         }
 
-        /* Динамическая метка для ошибок/успеха */
         .status-label {
             font-size: 14px;
             margin-bottom: 15px;
@@ -195,7 +188,14 @@
         .btn-submit:hover {
             background-color: #5ab4e6;
         }
-        /* Стили для блока статистики */
+
+        .btn-toggle-password {
+            background-color: #5ab4e6;
+        }
+        .btn-toggle-password:hover {
+            background-color: #48a3d5;
+        }
+
         .stats-section {
             margin-bottom: 30px;
             padding-bottom: 20px;
@@ -267,23 +267,27 @@
                 </div>
 
                 <div class="password-section">
-                    <h3>Смена пароля</h3>
+                    <button type="button" id="togglePasswordBtn" class="btn-submit btn-toggle-password" style="margin-bottom: 20px;">
+                        Редактирование пароля
+                    </button>
 
-                    <form id="profileForm" action="/profile" method="POST">
-                        <div class="input-group">
-                            <input type="password" name="old_password" placeholder="Старый пароль">
-                        </div>
-                        <div class="input-group">
-                          <input type="password" name="new_password" placeholder="Новый пароль" minlength="3" maxlength="25">
-                        </div>
+                    <div id="profileFormWrapper" style="display: none; margin-top: 20px;">
+                        <form id="profileForm" action="/profile" method="POST">
+                            <div class="input-group">
+                                <input type="password" name="old_password" id="old_password" placeholder="Старый пароль">
+                            </div>
+                            <div class="input-group">
+                              <input type="password" name="new_password" id="new_password" placeholder="Новый пароль" minlength="3" maxlength="25">
+                            </div>
 
-                        <div class="status-label" id="status-label" style="color: {{ label_color }};">
-                            {{ message }}
-                        </div>
-
-                        <button type="submit" class="btn-submit">Принять</button>
-                    </form>
+                            <div class="status-label" id="status-label" style="color: {{ label_color }};">
+                                {{ message }}
+                            </div>
+                        </form>
+                    </div>
                 </div>
+
+                <button type="submit" form="profileForm" class="btn-submit" style="margin-top: 15px;">Принять</button>
 
             </div>
         </main>
@@ -293,21 +297,20 @@
         const ctx = document.getElementById('weightChart').getContext('2d');
 
         // Jinja2 подставит сюда списки из вашего FastAPI бэкенда.
-        // Если данных нет, по умолчанию отобразятся пустые массивы.
         const dateLabels = {{ weight_dates | tojson if weight_dates else '[]' }};
         const weightData = {{ weight_values | tojson if weight_values else '[]' }};
 
         const weightChart = new Chart(ctx, {
-            type: 'bar', // Тип графика: гистограмма (столбцы)
+            type: 'bar',
             data: {
-                labels: dateLabels, // Даты снизу под столбцами
+                labels: dateLabels,
                 datasets: [{
                     label: 'Вес (кг)',
-                    data: weightData, // Значения веса
-                    backgroundColor: '#84d1fa', // Светло-голубой цвет столбцов
-                    borderColor: '#5ab4e6', // Темно-голубая рамка
+                    data: weightData,
+                    backgroundColor: '#84d1fa',
+                    borderColor: '#5ab4e6',
                     borderWidth: 1,
-                    borderRadius: 4, // Закругление вершин столбцов
+                    borderRadius: 4,
                     barThickness: 25,
                     minBarLength: 20
                 }]
@@ -316,7 +319,7 @@
                 responsive: true,
                 scales: {
                     y: {
-                        beginAtZero: false, // Чтобы график красиво масштабировался вокруг веса пользователя (например от 50 до 100), а не уходил в бесконечность от 0
+                        beginAtZero: false,
                         title: {
                             display: true,
                             text: 'КГ'
@@ -331,10 +334,38 @@
                 },
                 plugins: {
                     legend: {
-                        display: false // Скрываем легенду, так как у нас всего один параметр (Вес)
+                        display: false
                     }
                 }
             }
+        });
+
+        // Логика кнопки-переключателя для формы пароля
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const formWrapper = document.getElementById('profileFormWrapper');
+
+            const oldPasswordInput = document.getElementById('old_password');
+            const newPasswordInput = document.getElementById('new_password');
+            const statusLabel = document.getElementById('status-label');
+
+            // Автоматически раскрываем форму, если сервер вернул сообщение
+            const serverMessage = "{{ message }}".trim();
+            if (serverMessage && serverMessage !== "None") {
+                formWrapper.style.display = 'block';
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                if (formWrapper.style.display === 'none' || formWrapper.style.display === '') {
+                    formWrapper.style.display = 'block';
+                } else {
+                    formWrapper.style.display = 'none';
+                    // Стираем значения полей ввода при сокрытии формы
+                    if (oldPasswordInput) oldPasswordInput.value = '';
+                    if (newPasswordInput) newPasswordInput.value = '';
+                    if (statusLabel) statusLabel.textContent = '';
+                }
+            });
         });
     </script>
 </body>

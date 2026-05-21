@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Шаблоны тренировок</title>
     <style>
-    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
     body, html {
         margin: 0;
         padding: 0;
@@ -43,7 +42,6 @@
         overflow: hidden;
     }
 
-    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
     nav {
         width: 250px;
         background-color: #ffffff;
@@ -81,7 +79,6 @@
         font-weight: bold;
     }
 
-    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
     main {
         flex-grow: 1;
         padding: 30px;
@@ -90,7 +87,6 @@
         flex-direction: column;
     }
 
-    /* ================= СЕКЦИЯ ШАБЛОНОВ ================= */
     .templates-section {
         background-color: #ffffff;
         border-radius: 15px;
@@ -141,7 +137,6 @@
         font-size: 15px;
     }
 
-    /* Зона со скроллом для списка */
     .templates-list-container {
         flex-grow: 1;
         overflow-y: auto;
@@ -149,7 +144,6 @@
         min-height: 0;
     }
 
-    /* Кастомный скроллбар */
     .templates-list-container::-webkit-scrollbar { width: 6px; }
     .templates-list-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .templates-list-container::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
@@ -165,7 +159,6 @@
         background-color: #fcfdfe;
     }
 
-    /* Плашка одного шаблона */
     .template-item {
         display: flex;
         justify-content: space-between;

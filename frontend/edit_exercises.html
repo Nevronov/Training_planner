@@ -212,7 +212,6 @@
         font-weight: 600;
     }
 
-    /* Кнопки групп мышц */
     .muscle-btn-container {
         display: flex;
         gap: 12px;
@@ -409,56 +408,44 @@
     </div>
 
     <script>
-        // Функция выбора и изоляции групп мышц
+        // Функция выбора нескольких групп мышц
         function selectMuscleGroup(muscleId) {
-            // Если администратор, то клики полностью игнорируются бэкендом, но добавим подстраховку на фронте
+            // Если администратор, клики полностью игнорируются
             {% if user_id == 1 %} return; {% endif %}
 
             const hiddenInput = document.getElementById('selected-muscle');
-            const buttons = document.querySelectorAll('.muscle-toggle-btn');
+            const button = document.querySelector(`.muscle-toggle-btn[data-id="${muscleId}"]`);
 
-            // Повторный клик по активной кнопке сбрасывает выбор и разблокирует остальные
-            if (hiddenInput.value == muscleId) {
-                hiddenInput.value = '';
-                buttons.forEach(btn => {
-                    btn.classList.remove('selected', 'blocked');
-                    btn.disabled = false;
-                });
-                return;
+            // Получаем текущие выбранные ID в виде массива (фильтруем пустые значения)
+            let selectedIds = hiddenInput.value ? hiddenInput.value.split(',') : [];
+
+            if (selectedIds.includes(String(muscleId))) {
+                // Если уже выбрано — удаляем из списка
+                selectedIds = selectedIds.filter(id => id !== String(muscleId));
+                button.classList.remove('selected');
+            } else {
+                // Если не выбрано — добавляем в список
+                selectedIds.push(String(muscleId));
+                button.classList.add('selected');
             }
 
-            // Фиксация выбора группы мышц и блокировка неактивных элементов
-            hiddenInput.value = muscleId;
-            buttons.forEach(btn => {
-                if (btn.getAttribute('data-id') == muscleId) {
-                    btn.classList.add('selected');
-                    btn.classList.remove('blocked');
-                    btn.disabled = false;
-                } else {
-                    btn.classList.remove('selected');
-                    btn.classList.add('blocked');
-                    btn.disabled = true; // Полное отключение взаимодействия
-                }
-            });
+            // Записываем обратно в скрытое поле через запятую
+            hiddenInput.value = selectedIds.join(',');
         }
 
-        // Инициализация интерфейса при загрузке страницы (восстановление выбранной группы мышц)
+        // Инициализация интерфейса при загрузке страницы (восстановление выбранных групп мышц)
         document.addEventListener("DOMContentLoaded", function() {
-            const initialMuscleId = document.getElementById('selected-muscle').value;
+            const initialMuscleValue = document.getElementById('selected-muscle').value;
 
-            if (initialMuscleId) {
+            if (initialMuscleValue) {
+                // Превращаем строку "1,2,3" в массив ["1", "2", "3"]
+                const selectedIds = initialMuscleValue.split(',');
+
                 const buttons = document.querySelectorAll('.muscle-toggle-btn');
                 buttons.forEach(btn => {
                     const currentId = btn.getAttribute('data-id');
-                    if (currentId == initialMuscleId) {
+                    if (selectedIds.includes(String(currentId))) {
                         btn.classList.add('selected');
-                    } else {
-                        btn.classList.add('blocked');
-                        // Если зашел обычный пользователь, блокируем неактивные кнопки.
-                        // Если зашел админ (user_id == 1), они уже выключены сервером через тег disabled.
-                        {% if user_id != 1 %}
-                            btn.disabled = true;
-                        {% endif %}
                     }
                 });
             }

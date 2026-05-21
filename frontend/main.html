@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная - Планировщик тренировок</title>
     <style>
-        /* Общие настройки страницы */
         body, html {
             margin: 0;
             padding: 0;
@@ -16,7 +15,6 @@
             flex-direction: column;
         }
 
-        /* Верхняя панель (Хедер) */
         header {
             background-color: #ffffff;
             padding: 15px 30px;
@@ -57,18 +55,16 @@
             letter-spacing: 0.5px;
         }
 
-        /* Контейнер для нижней части (Меню + Контент) */
         .app-container {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
 
-        /* Боковая панель (Сайдбар) */
         nav {
             background-color: #ffffff;
-            width: 260px;
-            min-width: 260px;
+            width: 250px;
+            min-width: 250px;
             border-right: 1px solid #d1eeff;
             display: flex;
             flex-direction: column;
@@ -113,7 +109,6 @@
             font-weight: bold;
         }
 
-        /* Основная область контента */
         main {
             flex: 1;
             padding: 30px 40px;
@@ -127,7 +122,6 @@
             width: 100%;
         }
 
-        /* Секция приветствия */
         .welcome-section {
             background: white;
             border-radius: 20px;
@@ -158,7 +152,6 @@
             margin-bottom: 15px;
         }
 
-        /* Карточки возможностей */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -203,7 +196,6 @@
             margin: 0;
         }
 
-        /* Секция технологий */
         .tech-section {
             background: white;
             border-radius: 20px;
@@ -256,7 +248,6 @@
             margin: 0;
         }
 
-        /* Секция статистики */
         .stats-section {
             background: linear-gradient(135deg, #84d1fa, #5ab4e6);
             border-radius: 20px;
@@ -290,7 +281,6 @@
             font-weight: 500;
         }
 
-        /* Секция с GitHub */
         .github-section {
             background: white;
             border-radius: 20px;
@@ -352,7 +342,6 @@
             font-weight: 600;
         }
 
-        /* Футер */
         .footer-note {
             text-align: center;
             color: #b0d4e3;
@@ -360,7 +349,6 @@
             padding: 20px 0;
         }
 
-        /* Анимация появления */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -424,7 +412,6 @@
                 <!-- Карточки возможностей -->
                 <div class="features-grid">
                     <div class="feature-card animate delay-1" onclick="location.href='/calendar'">
-                        <span class="feature-icon">📅</span>
                         <h3 class="feature-title">Календарь тренировок</h3>
                         <p class="feature-description">
                             Наглядный месячный календарь с цветовой индикацией статуса тренировок.
@@ -433,7 +420,6 @@
                     </div>
 
                     <div class="feature-card animate delay-1" onclick="location.href='/templates'">
-                        <span class="feature-icon">📋</span>
                         <h3 class="feature-title">Шаблоны тренировок</h3>
                         <p class="feature-description">
                             Создавайте и сохраняйте шаблоны тренировок. Комбинируйте упражнения,
@@ -442,7 +428,6 @@
                     </div>
 
                     <div class="feature-card animate delay-2" onclick="location.href='/exercises'">
-                        <span class="feature-icon">💪</span>
                         <h3 class="feature-title">База упражнений</h3>
                         <p class="feature-description">
                             Обширный каталог упражнений с привязкой к группам мышц.
@@ -451,7 +436,6 @@
                     </div>
 
                     <div class="feature-card animate delay-2" onclick="location.href='/profile'">
-                        <span class="feature-icon">📊</span>
                         <h3 class="feature-title">Отслеживание прогресса</h3>
                         <p class="feature-description">
                             Ведите журнал веса, отслеживайте динамику и анализируйте
@@ -460,7 +444,6 @@
                     </div>
 
                     <div class="feature-card animate delay-3">
-                        <span class="feature-icon">🎯</span>
                         <h3 class="feature-title">Система статусов</h3>
                         <p class="feature-description">
                             Отмечайте выполненные тренировки одним кликом.
@@ -469,7 +452,6 @@
                     </div>
 
                     <div class="feature-card animate delay-3">
-                        <span class="feature-icon">🔒</span>
                         <h3 class="feature-title">Безопасность данных</h3>
                         <p class="feature-description">
                             Авторизация через cookies, защита паролей и персональные данные.
@@ -485,28 +467,10 @@
                         Проект с открытым исходным кодом на GitHub
                     </p>
                     <a href="https://github.com/Nevronov/Training_planner" target="_blank" class="github-button">
-                        <span style="font-size: 20px;">⭐</span>
                         Перейти в репозиторий
                         <span style="font-size: 20px;">→</span>
                     </a>
 
-                    <div class="quick-start">
-                        <h3>⚡ Быстрый старт (3 простых шага)</h3>
-                        <ol>
-                            <li>Клонируйте репозиторий:<br>
-                                <code>git clone https://github.com/Nevronov/Training_planner.git</code>
-                            </li>
-                            <li>Установите зависимости:<br>
-                                <code>pip install -r requirements.txt</code>
-                            </li>
-                            <li>Запустите сервер:<br>
-                                <code>python main.py</code> или <code>uvicorn main:app --reload</code>
-                            </li>
-                        </ol>
-                        <p style="color: #888; font-size: 13px; margin: 15px 0 0 0;">
-                            📌 Откройте браузер и перейдите по адресу: <code>http://localhost:8000</code>
-                        </p>
-                    </div>
                 </div>
 
             </div>

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление шаблоном</title>
     <style>
-    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
     body, html {
         margin: 0;
         padding: 0;
@@ -44,7 +43,6 @@
         overflow: hidden;
     }
 
-    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
     nav {
         width: 250px;
         background-color: #ffffff;
@@ -83,7 +81,6 @@
         font-weight: bold;
     }
 
-    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
     main {
         flex-grow: 1;
         padding: 30px;
@@ -92,7 +89,6 @@
         flex-direction: column;
     }
 
-    /* ================= ФОРМА РЕДАКТИРОВАНИЯ ШАБЛОНА ================= */
     .template-form {
         background-color: #ffffff;
         border-radius: 15px;
@@ -196,7 +192,6 @@
         box-shadow: 0 0 8px rgba(132, 209, 250, 0.4);
     }
 
-    /* ================= БЛОК "ВЫБОР УПРАЖНЕНИЙ" ================= */
     .exercise-selection-section {
         flex-grow: 1;
         display: flex;
@@ -249,15 +244,14 @@
 
     .exercise-item {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
         background-color: #ffffff;
-        padding: 12px 18px;
+        padding: 14px 18px;
         border-radius: 8px;
         margin-bottom: 10px;
         border: 1px solid #d1eeff;
         border-left: 4px solid #84d1fa;
-        gap: 15px;
+        gap: 10px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
@@ -266,18 +260,25 @@
         box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
     }
 
-    .exercise-info {
+    .exercise-main-row {
         display: flex;
+        justify-content: space-between;
         align-items: center;
         gap: 15px;
-        flex-grow: 1;
-        min-width: 150px;
+        width: 100%;
     }
 
     .exercise-title {
         font-size: 15px;
         font-weight: 600;
         color: #34495e;
+        flex-grow: 1;
+    }
+
+    .exercise-muscles-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
     }
 
     .muscle-badge {
@@ -334,7 +335,6 @@
     .btn-delete-item { background-color: #fff0f0; color: #ff4d4d; }
     .btn-delete-item:hover { background-color: #ff4d4d; color: white; }
 
-    /* ================= СТИЛИ МОДАЛЬНОГО ОКНА ================= */
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -350,9 +350,9 @@
 
     .modal-window {
         background-color: #ffffff;
-        width: 600px;
-        max-width: 90%;
-        max-height: 80vh;
+        width: 650px;
+        max-width: 95%;
+        max-height: 85vh;
         border-radius: 15px;
         box-shadow: 0 10px 25px rgba(132, 209, 250, 0.25);
         border: 1px solid #84d1fa;
@@ -388,7 +388,7 @@
     .btn-close-modal:hover { color: #5ab4e6; }
 
     .modal-content-list {
-        padding: 20px;
+        padding: 10px 20px;
         overflow-y: auto;
         flex-grow: 1;
     }
@@ -398,53 +398,74 @@
     .modal-content-list::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
     .modal-content-list::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
 
-    /* Карточка упражнения внутри модалки */
-    .modal-exercise-row {
+    .modal-exercise-card {
+        display: flex;
+        flex-direction: column;
+        padding: 18px 0;
+        border-bottom: 1px solid #e8f7ff;
+        gap: 12px;
+    }
+    .modal-exercise-card:last-child { border-bottom: none; }
+
+    .modal-card-top-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #e8f7ff;
         gap: 15px;
     }
-    .modal-exercise-row:last-child { border-bottom: none; }
 
-    .modal-ex-details {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+    .modal-ex-name {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 16px;
+        margin: 0;
         flex-grow: 1;
     }
-
-    .modal-ex-title-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .modal-ex-name { font-weight: bold; color: #2c3e50; font-size: 15px; }
-    .modal-ex-desc { font-size: 13px; color: #7f8c8d; margin: 0; }
 
     .btn-plus-add {
         background-color: #e8f7ff;
         color: #5ab4e6;
         border: 2px solid #84d1fa;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        font-size: 18px;
+        font-size: 20px;
         font-weight: bold;
         cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
         transition: all 0.2s;
+        flex-shrink: 0;
     }
     .btn-plus-add:hover {
         background-color: #5ab4e6;
         color: white;
         border-color: #5ab4e6;
         transform: scale(1.05);
+    }
+
+    .modal-card-desc-row {
+        margin: 0;
+    }
+
+    .modal-ex-desc {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .modal-card-muscles-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .modal-card-muscles-row .muscle-badge {
+        font-size: 11px;
+        padding: 3px 12px;
     }
     </style>
 </head>
@@ -503,40 +524,50 @@
                             {% for exercise in exercises %}
                             <div class="exercise-item">
                                 <input type="hidden" name="exercise_ids" value="{{ exercise.id }}">
-                                <div class="exercise-info">
+
+                                <div class="exercise-main-row">
                                     <span class="exercise-title">{{ exercise.name }}</span>
-                                    <span class="muscle-badge">{{ exercise.muscle }}</span>
-                                </div>
 
-                                <div class="inputs-group">
-                                    <div class="sets-input-wrapper">
-                                        <input type="number"
-                                               name="sets_count"
-                                               class="input-sets"
-                                               placeholder="0"
-                                               min="1"
-                                               max="99"
-                                               value="{{ exercise.sets if exercise.sets else '' }}"
-                                               required>
-                                        <span class="sets-label">подх.</span>
+                                    <div class="inputs-group">
+                                        <div class="sets-input-wrapper">
+                                            <input type="number"
+                                                   name="sets_count"
+                                                   class="input-sets"
+                                                   placeholder="0"
+                                                   min="1"
+                                                   max="99"
+                                                   value="{{ exercise.sets if exercise.sets else '' }}"
+                                                   required>
+                                            <span class="sets-label">подх.</span>
+                                        </div>
+
+                                        <div class="weight-input-wrapper">
+                                            <input type="number"
+                                                   name="weight"
+                                                   class="input-sets"
+                                                   placeholder="0"
+                                                   min="0.1"
+                                                   max="500"
+                                                   step="any"
+                                                   value="{{ exercise.weight if exercise.weight else '' }}">
+                                            <span class="sets-label">Вес (кг.)</span>
+                                        </div>
                                     </div>
 
-                                    <div class="weight-input-wrapper">
-                                        <input type="number"
-                                               name="weight"
-                                               class="input-sets"
-                                               placeholder="0"
-                                               min="0.1"
-                                               max="500"
-                                               step="any"
-                                               value="{{ exercise.weight if exercise.weight else '' }}">
-                                        <span class="sets-label">Вес (кг.)</span>
+                                    <div class="exercise-actions">
+                                        <a href="/exercises/edit?exercise_id={{ exercise.id }}" class="btn-action btn-view">Просмотр</a>
+                                        <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
                                     </div>
                                 </div>
 
-                                <div class="exercise-actions">
-                                    <a href="/exercises/edit?exercise_id={{ exercise.id }}" class="btn-action btn-view">Просмотр</a>
-                                    <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
+                                <div class="exercise-muscles-row">
+                                    {% if exercise.muscle and ',' in exercise.muscle %}
+                                        {% for muscle in exercise.muscle.split(',') %}
+                                            <span class="muscle-badge">{{ muscle.strip() }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="muscle-badge">{{ exercise.muscle if exercise.muscle else 'Не указано' }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -562,36 +593,50 @@
             <div class="modal-content-list">
                 {% if all_exercises %}
                     {% for ex in all_exercises %}
-                    <div class="modal-exercise-row">
-                        <div class="modal-ex-details">
-                            <div class="modal-ex-title-row">
-                                <span class="modal-ex-name">{{ ex.name }}</span>
-                                <span class="muscle-badge">{{ ex.muscle }}</span>
-                            </div>
+                    <div class="modal-exercise-card">
+
+                        <div class="modal-card-top-row">
+                            <h4 class="modal-ex-name">{{ ex.name }}</h4>
+                            <button type="button" class="btn-plus-add" onclick="addExercise('{{ ex.id }}', '{{ ex.name }}', '{{ ex.muscle }}')">+</button>
+                        </div>
+
+                        <div class="modal-card-desc-row">
                             <p class="modal-ex-desc">{{ ex.description if ex.description else 'Нет описания.' }}</p>
                         </div>
-                        <button type="button" class="btn-plus-add" onclick="addExercise('{{ ex.id }}', '{{ ex.name }}', '{{ ex.muscle }}')">+</button>
+
+                        <div class="modal-card-muscles-row">
+                            {% if ex.muscle %}
+                                {% if ex.muscle is iterable and ex.muscle is not string %}
+                                    {% for muscle in ex.muscle %}
+                                        <span class="muscle-badge">{{ muscle }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for muscle in ex.muscle.split(',') %}
+                                        <span class="muscle-badge">{{ muscle.strip() }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            {% else %}
+                                <span class="muscle-badge" style="background-color: #f5f5f5; color: #999; border-color: #ddd;">Мышцы не указаны</span>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p style="text-align: center; color: #999;">В базе данных нет доступных упражнений.</p>
+                    <p style="text-align: center; color: #999; padding: 20px;">В базе данных нет доступных упражнений.</p>
                 {% endif %}
             </div>
         </div>
     </div>
 
     <script>
-        // Открыть окно
         function openModal() {
             document.getElementById('exercise-modal').style.display = 'flex';
         }
 
-        // Закрыть окно
         function closeModal() {
             document.getElementById('exercise-modal').style.display = 'none';
         }
 
-        // Закрытие по клику на фон вне окна
         window.onclick = function(event) {
             const modal = document.getElementById('exercise-modal');
             if (event.target === modal) {
@@ -599,44 +644,54 @@
             }
         }
 
-        // Функция динамического вброса нового упражнения в список основной формы
-        function addExercise(id, name, muscle) {
+        // Обновленная JavaScript функция для динамического добавления упражнения в две строки
+        function addExercise(id, name, muscleString) {
             const container = document.getElementById('exercises-container');
-
-            // Создаем новую плашку упражнения
             const exerciseItem = document.createElement('div');
             exerciseItem.className = 'exercise-item';
 
-            // Забиваем структуру точно такую же, как генерирует Jinja2
+            // Разбиваем входящую строку мышц, чтобы сгенерировать независимые бейджи на второй строке
+            let musclesHtml = '';
+            if (muscleString) {
+                const musclesArray = muscleString.split(',');
+                musclesArray.forEach(m => {
+                    musclesHtml += `<span class="muscle-badge">${m.trim()}</span>`;
+                });
+            } else {
+                musclesHtml = `<span class="muscle-badge">Не указано</span>`;
+            }
+
+            // Новая структура в две строки полностью повторяет Jinja-шаблон
             exerciseItem.innerHTML = `
                 <input type="hidden" name="exercise_ids" value="${id}">
-                <div class="exercise-info">
+
+                <div class="exercise-main-row">
                     <span class="exercise-title">${name}</span>
-                    <span class="muscle-badge">${muscle}</span>
-                </div>
 
-                <div class="inputs-group">
-                    <div class="sets-input-wrapper">
-                        <input type="number" name="sets_count" class="input-sets" placeholder="0" min="1" max="99" required>
-                        <span class="sets-label">подх.</span>
+                    <div class="inputs-group">
+                        <div class="sets-input-wrapper">
+                            <input type="number" name="sets_count" class="input-sets" placeholder="0" min="1" max="99" required>
+                            <span class="sets-label">подх.</span>
+                        </div>
+
+                        <div class="weight-input-wrapper">
+                            <input type="number" name="weight" class="input-sets" placeholder="0" min="0.1" max="500" step="any">
+                            <span class="sets-label">Вес (кг.)</span>
+                        </div>
                     </div>
 
-                    <div class="weight-input-wrapper">
-                        <input type="number" name="weight" class="input-sets" placeholder="0" min="0.1" max="500" step="any">
-                        <span class="sets-label">Вес (кг.)</span>
+                    <div class="exercise-actions">
+                        <a href="/exercises/edit?exercise_id=${id}" class="btn-action btn-view">Просмотр</a>
+                        <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
                     </div>
                 </div>
 
-                <div class="exercise-actions">
-                    <button type="button" class="btn-action btn-view">Просмотр</button>
-                    <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
+                <div class="exercise-muscles-row">
+                    ${musclesHtml}
                 </div>
             `;
 
-            // Прикрепляем в конец зоны скролла
             container.appendChild(exerciseItem);
-
-            // Закрываем модальное окно после выбора
             closeModal();
         }
     </script>
