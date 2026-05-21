@@ -5,6 +5,7 @@ create table Users
   u_login varchar(25) unique not null,
   u_password varchar(20) not null
 );
+
 create table Weight_logs
 (
   wl_id integer primary key autoincrement,
@@ -12,7 +13,7 @@ create table Weight_logs
   wl_weight real not null,
   wl_date text not null
 );
--- Если даты нет - это шаблон. Дата больше текущей - запланированная тренировка
+
 create table Workouts
 (
   w_id integer primary key autoincrement,
@@ -33,6 +34,13 @@ create table Muscle_groups
 (
   m_id integer primary key autoincrement,
   m_name varchar(25) unique not null
+);
+
+create table Muscles_list
+(
+  ml_id integer primary key autoincrement,
+  ml_muscle integer references Muscle_groups(m_id) not null,
+  ml_exercises integer references Exercises(e_id) not null
 );
 
 create table Exercises
