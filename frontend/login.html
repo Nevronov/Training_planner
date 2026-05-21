@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <style>
+        /* Основные настройки фона и шрифтов */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f7ff; /* Светлый оттенок согласно заданию */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Центральное поле (контейнер формы) */
+        .login-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(132, 209, 250, 0.3);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            border: 1px solid #84d1fa;
+        }
+
+        h2 {
+            color: #5ab4e6; /* Тёмный оттенок #84d1fa */
+            margin-bottom: 25px;
+        }
+
+        /* Поля ввода */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #84d1fa;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #5ab4e6;
+        }
+
+        /* Цвет плейсхолдера (серый текст, пропадающий при нажатии) */
+        input::placeholder {
+            color: #a9a9a9;
+        }
+
+        /* Большая кнопка "Вход" */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: #84d1fa;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: #5ab4e6;
+        }
+
+        /* Гиперссылка Регистрация */
+        .register-link {
+            display: block;
+            margin-top: 15px;
+            color: #5ab4e6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .register-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Авторизация</h2>
+        
+        <form action="/login" method="post">
+            <div class="input-group">
+                <input type="text" name="u_login" placeholder="Логин" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="u_password" placeholder="Пароль" required>
+            </div>
+            <p id="status-label" style="color: #ff4d4d; font-size: 16px; margin-bottom: 15px;">
+                {{ message }}
+            </p>
+            <button type="submit" class="btn-login">Вход</button>
+            
+            <a href="/register" class="register-link">Регистрация</a>
+        </form>
+    </div>
+
+</body>
+</html>

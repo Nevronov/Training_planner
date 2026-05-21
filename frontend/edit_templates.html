@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление шаблоном</title>
+    <style>
+    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f9ff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffffff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+        border-bottom: 2px solid #84d1fa;
+        z-index: 10;
+        box-sizing: border-box;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        color: #5ab4e6;
+        font-size: 24px;
+        font-weight: bold;
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .logo-link:hover {
+        opacity: 0.8;
+    }
+
+    .app-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
+    nav {
+        width: 250px;
+        background-color: #ffffff;
+        padding: 20px 0;
+        border-right: 1px solid #d1eeff;
+        box-shadow: 2px 0 5px rgba(132, 209, 250, 0.03);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .nav-button {
+        background: none;
+        border: none;
+        padding: 15px 25px;
+        text-align: left;
+        font-size: 16px;
+        color: #444;
+        cursor: pointer;
+        width: 100%;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        transform: translateX(4px);
+    }
+
+    .nav-button.active {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        font-weight: bold;
+    }
+
+    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
+    main {
+        flex-grow: 1;
+        padding: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ================= ФОРМА РЕДАКТИРОВАНИЯ ШАБЛОНА ================= */
+    .template-form {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+        border: 1px solid #84d1fa;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .template-form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8f7ff;
+    }
+
+    .template-main-title-input {
+        margin: 0;
+        color: #333;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: left;
+        border: none;
+        background: transparent;
+        outline: none;
+        border-bottom: 2px solid #d1eeff;
+        padding: 6px 0;
+        flex-grow: 1;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: border-color 0.2s ease;
+    }
+
+    .template-main-title-input:focus {
+        border-bottom: 2px solid #84d1fa;
+        color: #000;
+    }
+
+    .template-main-title-input::placeholder {
+        color: #bbb;
+        font-weight: normal;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-header {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .btn-save { background-color: #84d1fa; color: white; }
+    .btn-save:hover { background-color: #5ab4e6; }
+
+    .btn-delete {
+        background-color: #fff0f0;
+        color: #ff4d4d;
+        border: 1px solid #ffcccc;
+    }
+    .btn-delete:hover {
+        background-color: #ff4d4d;
+        color: white;
+        border-color: #ff4d4d;
+    }
+
+    .template-description-field {
+        width: 100%;
+        height: 100px;
+        min-height: 80px;
+        max-height: 120px;
+        padding: 12px;
+        border: 2px solid #84d1fa;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        box-sizing: border-box;
+        resize: vertical;
+        margin-bottom: 25px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .template-description-field:focus {
+        border-color: #5ab4e6;
+        box-shadow: 0 0 8px rgba(132, 209, 250, 0.4);
+    }
+
+    /* ================= БЛОК "ВЫБОР УПРАЖНЕНИЙ" ================= */
+    .exercise-selection-section {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .exercise-selection-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .exercise-selection-header h3 {
+        margin: 0;
+        color: #5ab4e6;
+        font-size: 18px;
+    }
+
+    .btn-add-exercise {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        padding: 8px 16px;
+        border: 2px solid #84d1fa;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-add-exercise:hover {
+        background-color: #84d1fa;
+        color: white;
+        border-color: #84d1fa;
+    }
+
+    .exercises-scrollbar-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #d1eeff;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #fcfdfe;
+    }
+
+    .exercises-scrollbar-list::-webkit-scrollbar { width: 6px; }
+    .exercises-scrollbar-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .exercises-scrollbar-list::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
+    .exercises-scrollbar-list::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
+
+    .exercise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 12px 18px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #d1eeff;
+        border-left: 4px solid #84d1fa;
+        gap: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .exercise-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
+    }
+
+    .exercise-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-grow: 1;
+        min-width: 150px;
+    }
+
+    .exercise-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    .muscle-badge {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid #84d1fa;
+        white-space: nowrap;
+    }
+
+    .inputs-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .input-sets {
+        width: 60px;
+        padding: 6px;
+        border: 2px solid #84d1fa;
+        border-radius: 6px;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .input-sets:focus {
+        border-color: #5ab4e6;
+    }
+
+    .sets-label {
+        font-size: 13px;
+        color: #5ab4e6;
+        margin-left: 5px;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-view { background-color: #e8f7ff; color: #5ab4e6; }
+    .btn-view:hover { background-color: #84d1fa; color: white; }
+
+    .btn-delete-item { background-color: #fff0f0; color: #ff4d4d; }
+    .btn-delete-item:hover { background-color: #ff4d4d; color: white; }
+
+    /* ================= СТИЛИ МОДАЛЬНОГО ОКНА ================= */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-window {
+        background-color: #ffffff;
+        width: 600px;
+        max-width: 90%;
+        max-height: 80vh;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(132, 209, 250, 0.25);
+        border: 1px solid #84d1fa;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+        padding: 20px;
+        border-bottom: 2px solid #e8f7ff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 { margin: 0; color: #333; }
+
+    .btn-close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #aaa;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .btn-close-modal:hover { color: #5ab4e6; }
+
+    .modal-content-list {
+        padding: 20px;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .modal-content-list::-webkit-scrollbar { width: 6px; }
+    .modal-content-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .modal-content-list::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
+    .modal-content-list::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
+
+    /* Карточка упражнения внутри модалки */
+    .modal-exercise-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e8f7ff;
+        gap: 15px;
+    }
+    .modal-exercise-row:last-child { border-bottom: none; }
+
+    .modal-ex-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-grow: 1;
+    }
+
+    .modal-ex-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-ex-name { font-weight: bold; color: #2c3e50; font-size: 15px; }
+    .modal-ex-desc { font-size: 13px; color: #7f8c8d; margin: 0; }
+
+    .btn-plus-add {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border: 2px solid #84d1fa;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    .btn-plus-add:hover {
+        background-color: #5ab4e6;
+        color: white;
+        border-color: #5ab4e6;
+        transform: scale(1.05);
+    }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button active" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <form action="/templates/edit" method="POST" class="template-form">
+                {% if template %}
+                    <input type="hidden" name="workout_id" value="{{ template }}">
+                {% endif %}
+
+                <div class="template-form-header">
+                    <input type="text"
+                       name="w_name"
+                       class="template-main-title-input"
+                       placeholder="Название шаблона" value="{{ w_name if w_name and w_name != 'Создание шаблона' }}"
+                       minlength="3"
+                       maxlength="30"
+                       required>
+
+                    <div class="header-actions">
+                        {% if template %}
+                            <button type="button" class="btn-header btn-delete"
+                                    onclick="if(confirm('Удалить этот шаблон?')) document.getElementById('delete-template-form').submit();">
+                                Удалить шаблон
+                            </button>
+                        {% endif %}
+                        <button type="submit" class="btn-header btn-save">{{ w_edit }}</button>
+                    </div>
+                </div>
+
+                <textarea name="w_description" class="template-description-field" placeholder="Введите описание шаблона тренировки...">{{ w_description if w_description }}</textarea>
+
+                <div class="exercise-selection-section">
+                    <div class="exercise-selection-header">
+                        <h3>Выбор упражнений</h3>
+                        <button type="button" class="btn-add-exercise" onclick="openModal()">Добавить</button>
+                    </div>
+
+                    <div class="exercises-scrollbar-list" id="exercises-container">
+                        {% if exercises %}
+                            {% for exercise in exercises %}
+                            <div class="exercise-item">
+                                <input type="hidden" name="exercise_ids" value="{{ exercise.id }}">
+                                <div class="exercise-info">
+                                    <span class="exercise-title">{{ exercise.name }}</span>
+                                    <span class="muscle-badge">{{ exercise.muscle }}</span>
+                                </div>
+
+                                <div class="inputs-group">
+                                    <div class="sets-input-wrapper">
+                                        <input type="number"
+                                               name="sets_count"
+                                               class="input-sets"
+                                               placeholder="0"
+                                               min="1"
+                                               max="99"
+                                               value="{{ exercise.sets if exercise.sets else '' }}"
+                                               required>
+                                        <span class="sets-label">подх.</span>
+                                    </div>
+
+                                    <div class="weight-input-wrapper">
+                                        <input type="number"
+                                               name="weight"
+                                               class="input-sets"
+                                               placeholder="0"
+                                               min="0.1"
+                                               max="500"
+                                               step="any"
+                                               value="{{ exercise.weight if exercise.weight else '' }}">
+                                        <span class="sets-label">Вес (кг.)</span>
+                                    </div>
+                                </div>
+
+                                <div class="exercise-actions">
+                                    <a href="/exercises/edit?exercise_id={{ exercise.id }}" class="btn-action btn-view">Просмотр</a>
+                                    <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    {% if template %}
+    <form id="delete-template-form" action="/templates/delete" method="POST" style="display: none;">
+        <input type="hidden" name="template_id" value="{{ template }}">
+    </form>
+    {% endif %}
+
+    <div class="modal-overlay" id="exercise-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Выберите упражнение</h3>
+                <button type="button" class="btn-close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content-list">
+                {% if all_exercises %}
+                    {% for ex in all_exercises %}
+                    <div class="modal-exercise-row">
+                        <div class="modal-ex-details">
+                            <div class="modal-ex-title-row">
+                                <span class="modal-ex-name">{{ ex.name }}</span>
+                                <span class="muscle-badge">{{ ex.muscle }}</span>
+                            </div>
+                            <p class="modal-ex-desc">{{ ex.description if ex.description else 'Нет описания.' }}</p>
+                        </div>
+                        <button type="button" class="btn-plus-add" onclick="addExercise('{{ ex.id }}', '{{ ex.name }}', '{{ ex.muscle }}')">+</button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: #999;">В базе данных нет доступных упражнений.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Открыть окно
+        function openModal() {
+            document.getElementById('exercise-modal').style.display = 'flex';
+        }
+
+        // Закрыть окно
+        function closeModal() {
+            document.getElementById('exercise-modal').style.display = 'none';
+        }
+
+        // Закрытие по клику на фон вне окна
+        window.onclick = function(event) {
+            const modal = document.getElementById('exercise-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Функция динамического вброса нового упражнения в список основной формы
+        function addExercise(id, name, muscle) {
+            const container = document.getElementById('exercises-container');
+
+            // Создаем новую плашку упражнения
+            const exerciseItem = document.createElement('div');
+            exerciseItem.className = 'exercise-item';
+
+            // Забиваем структуру точно такую же, как генерирует Jinja2
+            exerciseItem.innerHTML = `
+                <input type="hidden" name="exercise_ids" value="${id}">
+                <div class="exercise-info">
+                    <span class="exercise-title">${name}</span>
+                    <span class="muscle-badge">${muscle}</span>
+                </div>
+
+                <div class="inputs-group">
+                    <div class="sets-input-wrapper">
+                        <input type="number" name="sets_count" class="input-sets" placeholder="0" min="1" max="99" required>
+                        <span class="sets-label">подх.</span>
+                    </div>
+
+                    <div class="weight-input-wrapper">
+                        <input type="number" name="weight" class="input-sets" placeholder="0" min="0.1" max="500" step="any">
+                        <span class="sets-label">Вес (кг.)</span>
+                    </div>
+                </div>
+
+                <div class="exercise-actions">
+                    <button type="button" class="btn-action btn-view">Просмотр</button>
+                    <button type="button" class="btn-action btn-delete-item" onclick="this.closest('.exercise-item').remove()">Удалить</button>
+                </div>
+            `;
+
+            // Прикрепляем в конец зоны скролла
+            container.appendChild(exerciseItem);
+
+            // Закрываем модальное окно после выбора
+            closeModal();
+        }
+    </script>
+</body>
+</html>

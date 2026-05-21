@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь тренировок</title>
+    <style>
+    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f9ff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffffff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+        border-bottom: 2px solid #84d1fa;
+        z-index: 10;
+        box-sizing: border-box;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        color: #5ab4e6;
+        font-size: 24px;
+        font-weight: bold;
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .logo-link:hover {
+        opacity: 0.8;
+    }
+
+    .app-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
+    nav {
+        width: 250px;
+        background-color: #ffffff;
+        border-right: 1px solid #d1eeff;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 25px;
+        color: #666666;
+        text-decoration: none;
+        font-size: 16px;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-item:hover {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+    }
+
+    .nav-item.active {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left-color: #84d1fa;
+        font-weight: bold;
+    }
+
+    .nav-item.logout {
+        margin-top: auto;
+        color: #ff4d4d;
+    }
+
+    .nav-item.logout:hover {
+        background-color: #fff0f0;
+        color: #ff4d4d;
+        border-left-color: #ff4d4d;
+    }
+
+    /* ================= ОСНОВНОЙ КОНТЕНТ ================= */
+    main {
+        flex-grow: 1;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-sizing: border-box;
+        min-height: 0;
+    }
+
+    /* Стили календаря */
+    .calendar-section {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+        border: 1px solid #84d1fa;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-sizing: border-box;
+        min-height: 0;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-shrink: 0;
+    }
+
+    .calendar-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333333;
+    }
+
+    .calendar-navigation {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .calendar-navigation button {
+        background-color: #84d1fa;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        white-space: nowrap;
+    }
+
+    .calendar-navigation button:hover {
+        background-color: #5ab4e6;
+    }
+
+    /* КОНТЕЙНЕР-СЕТКА ДЛЯ ДНЕЙ */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+        gap: 8px;
+        flex-grow: 1;
+        min-height: 0;
+    }
+
+    .weekday {
+        text-align: center;
+        font-weight: bold;
+        color: #5ab4e6;
+        padding: 8px 0;
+        border-bottom: 2px solid #e8f7ff;
+        font-size: 14px;
+    }
+
+    .calendar-day {
+        background-color: #f8fbff;
+        border: 2px solid #d1eeff;
+        border-radius: 8px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .calendar-day:hover {
+        background-color: #e8f7ff;
+        border-color: #84d1fa;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(132, 209, 250, 0.2);
+    }
+
+    .calendar-day.empty {
+        background-color: transparent;
+        border: 2px solid transparent;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .calendar-day.empty:hover {
+        background-color: transparent;
+        border-color: transparent;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .day-number {
+        font-weight: bold;
+        color: #333333;
+        font-size: clamp(11px, 1.2vw, 14px);
+        flex-shrink: 0;
+    }
+
+    /* Стиль для сегодняшнего дня */
+    .calendar-day.today {
+        background-color: #ffffff;
+        border-color: #5ab4e6;
+        box-shadow: 0 0 0 2px rgba(90, 180, 230, 0.3);
+    }
+
+    .calendar-day.today .day-number {
+        color: #5ab4e6;
+        font-weight: 900;
+    }
+
+    /* ================= ЦВЕТОВЫЕ СТАТУСЫ ДНЕЙ ================= */
+
+    /* Красный - невыполненная тренировка в прошлом */
+    .calendar-day.status-failed {
+        background-color: #ffeef0;
+        border-color: #ff6b6b;
+    }
+
+    .calendar-day.status-failed .day-number {
+        color: #ff4d4d;
+    }
+
+    /* Зелёный - выполненная тренировка */
+    .calendar-day.status-completed {
+        background-color: #e6fcf5;
+        border-color: #12b886;
+    }
+
+    .calendar-day.status-completed .day-number {
+        color: #0ca678;
+    }
+
+    /* Серый - будущая запланированная тренировка */
+    .calendar-day.status-planned {
+        background-color: #f1f3f5;
+        border-color: #adb5bd;
+    }
+
+    .calendar-day.status-planned .day-number {
+        color: #495057;
+    }
+
+    .workout-tag {
+        color: white;
+        font-size: clamp(9px, 0.9vw, 11px);
+        padding: 3px 6px;
+        border-radius: 4px;
+        margin-top: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+        flex-shrink: 0;
+        font-weight: 600;
+    }
+
+    /* Цвета тегов соответствуют статусам */
+    .status-failed .workout-tag {
+        background-color: #ff4d4d;
+    }
+
+    .status-completed .workout-tag {
+        background-color: #12b886;
+    }
+
+    .status-planned .workout-tag {
+        background-color: #868e96;
+    }
+
+    /* ================= МОДАЛЬНОЕ ОКНО ================= */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        width: 400px;
+        max-width: 90vw;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+        border: 2px solid #84d1fa;
+    }
+
+    /* Цветовые схемы модального окна */
+    .modal-content.status-failed {
+        background-color: #fff5f5;
+        border: 2px solid #ff6b6b;
+    }
+
+    .modal-content.status-completed {
+        background-color: #f0fdf4;
+        border: 2px solid #12b886;
+    }
+
+    .modal-content.status-planned {
+        background-color: #f8f9fa;
+        border: 2px solid #adb5bd;
+    }
+
+    .modal-content h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #333333;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #5ab4e6;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #84d1fa;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .form-group select:focus {
+        border-color: #5ab4e6;
+    }
+
+    .assigned-workout-info {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .workout-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f7ff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #84d1fa;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .workout-name-text {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333333;
+        word-break: break-word;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .modal-buttons-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-modal {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-modal:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .btn-confirm { background-color: #84d1fa; color: white; }
+    .btn-confirm:hover { background-color: #5ab4e6; }
+
+    .btn-cancel { background-color: #e2e8f0; color: #4a5568; }
+    .btn-cancel:hover { background-color: #cbd5e1; }
+
+    .btn-delete { background-color: #fa5252; color: white; }
+    .btn-delete:hover { background-color: #ff3838; }
+
+    .btn-toggle-status { background-color: #40c057; color: white; }
+    .btn-toggle-status:hover { background-color: #2f9e44; }
+
+    .btn-toggle-status.uncomplete { background-color: #fd7e14; color: white; }
+    .btn-toggle-status.uncomplete:hover { background-color: #e8590c; }
+
+    .btn-view-workout {
+        background-color: #228be6;
+        color: white;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    .btn-view-workout:hover {
+        background-color: #1c7ed6;
+    }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <a href="/calendar" class="nav-item active">Календарь</a>
+            <a href="/templates" class="nav-item">Шаблоны тренировок</a>
+            <a href="/exercises" class="nav-item">Упражнения</a>
+            <a href="/profile" class="nav-item">Профиль</a>
+            <a href="/logout" class="nav-item logout">Выход</a>
+        </nav>
+
+        <main>
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <h2 id="month-year-display">Май 2026</h2>
+                    <div class="calendar-navigation">
+                        <button id="prev-month">&lt;</button>
+                        <button id="next-month">&gt;</button>
+                    </div>
+                </div>
+
+                <div class="calendar-grid" id="calendar-grid">
+                    <div class="weekday">Пн</div>
+                    <div class="weekday">Вт</div>
+                    <div class="weekday">Ср</div>
+                    <div class="weekday">Чт</div>
+                    <div class="weekday">Пт</div>
+                    <div class="weekday">Сб</div>
+                    <div class="weekday">Вс</div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <div class="modal" id="workout-modal">
+        <div class="modal-content" id="modal-content-block">
+            <h3 id="selected-date-display">Дата тренировки: 01.05.2026</h3>
+
+            <form id="calendar-form" method="POST" action="/calendar/save">
+                <input type="hidden" name="date" id="selected-date-input">
+                <input type="hidden" name="action_type" id="action-type-input" value="save">
+                <input type="hidden" name="id" id="workout-id-input" value="">
+                <input type="hidden" name="status" id="workout-status-input" value="">
+
+                <div id="modal-mode-view" class="assigned-workout-info" style="display: none;">
+                    <div class="workout-title-row">
+                        <span id="modal-workout-name" class="workout-name-text">Название тренировки</span>
+                        <a href="#" id="modal-view-link" class="btn-modal btn-view-workout">Просмотр</a>
+                    </div>
+                    <div class="modal-buttons-vertical">
+                        <button type="button" id="btn-status-toggle" class="btn-modal btn-toggle-status">Отметить как выполненную</button>
+                        <button type="button" id="btn-delete-workout" class="btn-modal btn-delete">Удалить из календаря</button>
+                        <button type="button" class="btn-modal btn-cancel" onclick="closeModal()">Закрыть</button>
+                    </div>
+                </div>
+
+                <div id="modal-mode-add" style="display: none;">
+                    <div class="form-group">
+                        <label for="workout-template">Выберите шаблон тренировки:</label>
+                        <select name="template_id" id="workout-template" required>
+                            <option value="" disabled selected>-- Выберите шаблон --</option>
+                            {% if templates %}
+                                {% for template in templates %}
+                                    <option value="{{ template.id }}">{{ template.name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>У вас пока нет созданных шаблонов</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-modal btn-cancel" onclick="closeModal()">Отмена</button>
+                        <button type="submit" class="btn-modal btn-confirm">Принять</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // Данные с сервера
+    const serverWorkoutsData = {};
+
+    {% if scheduled_workouts %}
+        {% for sw in scheduled_workouts %}
+            serverWorkoutsData["{{ sw.date }}"] = {
+                id: "{{ sw.id }}",
+                name: "{{ sw.name }}",
+                completed: {{ 'true' if sw.completed else 'false' }},
+                template_id: "{{ sw.template_id }}"
+            };
+        {% endfor %}
+    {% endif %}
+
+    // ОТЛАДКА: Проверяем, что данные загрузились
+    console.log('=== ДАННЫЕ ТРЕНИРОВОК ===');
+    console.log('Количество записей:', Object.keys(serverWorkoutsData).length);
+    console.log('Все данные:', serverWorkoutsData);
+
+    // Выводим каждую запись отдельно
+    for (const [date, data] of Object.entries(serverWorkoutsData)) {
+        console.log(`Дата: ${date}, Название: ${data.name}, Выполнена: ${data.completed}, Тип completed: ${typeof data.completed}`);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('=== КАЛЕНДАРЬ ЗАГРУЖЕН ===');
+
+        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+        let currentDate = new Date();
+
+        console.log('Текущая дата:', currentDate);
+
+        function renderCalendar(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            console.log(`\n=== РЕНДЕР КАЛЕНДАРЯ: ${monthNames[month]} ${year} ===`);
+
+            document.getElementById('month-year-display').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const shiftIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            console.log(`Первый день месяца: ${firstDayIndex}, Сдвиг: ${shiftIndex}, Всего дней: ${totalDays}`);
+
+            const grid = document.getElementById('calendar-grid');
+
+            // Удаляем старые дни (оставляя заголовки дней недели)
+            const days = grid.querySelectorAll('.calendar-day');
+            days.forEach(day => day.remove());
+
+            // Пустые ячейки до 1 числа
+            for (let i = 0; i < shiftIndex; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('calendar-day', 'empty');
+                grid.appendChild(emptyDiv);
+            }
+
+            // Сегодняшняя дата для сравнения
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            console.log('Сегодня (нормализовано):', today.toISOString().split('T')[0]);
+
+            let coloredDaysCount = 0;
+
+            // Дни месяца
+            for (let day = 1; day <= totalDays; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day');
+
+                const numSpan = document.createElement('span');
+                numSpan.classList.add('day-number');
+                numSpan.textContent = day;
+                dayDiv.appendChild(numSpan);
+
+                const thisLoopDate = new Date(year, month, day);
+                thisLoopDate.setHours(0, 0, 0, 0);
+
+                // Проверка на сегодня
+                if (thisLoopDate.getTime() === today.getTime()) {
+                    dayDiv.classList.add('today');
+                }
+
+                // Форматируем ключ даты
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // Проверяем наличие тренировки
+                if (serverWorkoutsData[dateKey]) {
+                    const workout = serverWorkoutsData[dateKey];
+                    coloredDaysCount++;
+
+                    console.log(`\nДень ${day}: НАЙДЕНА тренировка`);
+                    console.log(`  - Дата: ${dateKey}`);
+                    console.log(`  - Название: ${workout.name}`);
+                    console.log(`  - completed: ${workout.completed} (тип: ${typeof workout.completed})`);
+                    console.log(`  - Дата тренировки < Сегодня: ${thisLoopDate.getTime() < today.getTime()}`);
+
+                    const tag = document.createElement('div');
+                    tag.classList.add('workout-tag');
+                    tag.textContent = workout.name;
+                    dayDiv.appendChild(tag);
+
+                    // ЛОГИКА ЦВЕТОВЫХ СТАТУСОВ
+                    if (thisLoopDate.getTime() <= today.getTime()) {
+                        // Прошедшие дни
+                        if (workout.completed) {
+                            dayDiv.classList.add('status-completed');
+                            console.log(`  - СТАТУС: ЗЕЛЁНЫЙ (выполнена)`);
+                        } else {
+                            dayDiv.classList.add('status-failed');
+                            console.log(`  - СТАТУС: КРАСНЫЙ (не выполнена)`);
+                        }
+                    } else {
+                        // Сегодня и будущие дни
+                        dayDiv.classList.add('status-planned');
+                        console.log(`  - СТАТУС: СЕРЫЙ (запланирована)`);
+                    }
+
+                    console.log(`  - Применённые классы: ${dayDiv.className}`);
+                }
+
+                dayDiv.addEventListener('click', () => openModal(day, month, year));
+                grid.appendChild(dayDiv);
+            }
+
+            console.log(`\nВсего окрашенных дней: ${coloredDaysCount}`);
+        }
+
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+
+        renderCalendar(currentDate);
+    });
+
+    function openModal(day, month, year) {
+        console.log(`\n=== ОТКРЫТИЕ МОДАЛЬНОГО ОКНА ===`);
+        console.log(`День: ${day}, Месяц: ${month}, Год: ${year}`);
+
+        const modal = document.getElementById('workout-modal');
+        const modalContent = document.getElementById('modal-content-block');
+        const dateInput = document.getElementById('selected-date-input');
+        const dateDisplay = document.getElementById('selected-date-display');
+        const form = document.getElementById('calendar-form');
+        const actionInput = document.getElementById('action-type-input');
+        const workoutIdInput = document.getElementById('workout-id-input');
+
+        const modeAdd = document.getElementById('modal-mode-add');
+        const modeView = document.getElementById('modal-mode-view');
+
+        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const displayDate = `${String(day).padStart(2, '0')}.${String(month + 1).padStart(2, '0')}.${year}`;
+
+        console.log(`Форматированная дата: ${formattedDate}`);
+
+        dateInput.value = formattedDate;
+        dateDisplay.textContent = `Дата: ${displayDate}`;
+
+        // Сбрасываем классы
+        modalContent.className = 'modal-content';
+        actionInput.value = 'save';
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(year, month, day);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        console.log(`Дата в прошлом: ${selectedDate.getTime() < today.getTime()}`);
+
+        // Проверяем наличие тренировки
+        if (serverWorkoutsData[formattedDate]) {
+            const workout = serverWorkoutsData[formattedDate];
+            console.log(`Найдена тренировка:`, workout);
+            workoutIdInput.value = workout.id;
+
+            modeAdd.style.display = 'none';
+            modeView.style.display = 'flex';
+
+            document.getElementById('modal-workout-name').textContent = workout.name;
+            document.getElementById('modal-view-link').href = `/templates/edit?workout_id=${workout.template_id}`;
+
+            const statusBtn = document.getElementById('btn-status-toggle');
+
+            // ЛОГИКА ЦВЕТА МОДАЛЬНОГО ОКНА
+            if (selectedDate.getTime() < today.getTime()) {
+                statusBtn.style.display = 'block';
+                // Прошедшие дни
+                if (workout.completed) {
+                    modalContent.classList.add('status-completed');
+                    statusBtn.textContent = 'Отменить выполнение';
+                    statusBtn.className = 'btn-modal btn-toggle-status uncomplete';
+                    console.log('Модальное окно: ЗЕЛЁНОЕ');
+                } else {
+                    modalContent.classList.add('status-failed');
+                    statusBtn.textContent = 'Отметить как выполненную';
+                    statusBtn.className = 'btn-modal btn-toggle-status';
+                    console.log('Модальное окно: КРАСНОЕ');
+                }
+            } else {
+                modalContent.classList.add('status-planned');
+                statusBtn.style.display = 'none';
+                console.log('Модальное окно: СЕРОЕ');
+            }
+
+            console.log('Классы модального окна:', modalContent.className);
+
+            statusBtn.onclick = () => {
+                actionInput.value = 'toggle_status';
+                form.action = '/calendar/toggle';
+                form.submit();
+            };
+
+            document.getElementById('btn-delete-workout').onclick = () => {
+                // ← ВОТ СЮДА ДОБАВИТЬ:
+                console.log('\n=== ОТПРАВКА НА УДАЛЕНИЕ ===');
+                console.log('ID из скрытого поля:', workoutIdInput.value);
+                console.log('Action type:', actionInput.value);
+                console.log('URL формы:', form.action);
+
+                actionInput.value = 'delete';
+                form.action = '/calendar/delete';
+
+                // ← И СЮДА:
+                console.log('Данные формы перед отправкой:');
+                console.log('- id:', workoutIdInput.value);
+                console.log('- action_type:', actionInput.value);
+                console.log('- date:', dateInput.value);
+                form.submit();
+
+
+            };
+
+        } else {
+            console.log('Тренировка не найдена, режим добавления');
+            modeView.style.display = 'none';
+            modeAdd.style.display = 'block';
+            form.action = '/calendar/save';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('workout-modal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('workout-modal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная</title>
+    <style>
+        /* Общие настройки страницы */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f9ff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Верхняя панель (Хедер) */
+        header {
+            background-color: #ffffff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+            border-bottom: 2px solid #84d1fa;
+            z-index: 10;
+        }
+
+        /* Название как скрытая кнопка-ссылка */
+        .logo-link {
+            text-decoration: none;
+            color: #5ab4e6;
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .logo-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Контейнер для нижней части (Меню + Контент) */
+        .app-container {
+            display: flex;
+            flex: 1; /* Растягивается на всю оставшуюся высоту */
+        }
+
+        /* Боковая панель (Сайдбар) */
+        nav {
+            background-color: #ffffff;
+            width: fit-content; /* Ширина по контенту */
+            min-width: 250px;
+            border-right: 1px solid #d1eeff;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        /* Кнопки меню */
+        .nav-button {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            text-align: left;
+            font-size: 16px;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-left: 4px solid transparent; /* Заготовка под выделение */
+        }
+
+        /* Эффект при наведении */
+        .nav-button:hover {
+            background-color: #e8f7ff;
+            color: #5ab4e6;
+            border-left: 4px solid #84d1fa;
+        }
+
+        /* Основная область контента */
+        main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .empty-state {
+            color: #b0d4e3;
+            font-size: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <div class="empty-state">
+                Здесь пока ничего нет. Выберите раздел в меню слева.
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Упражнения</title>
+    <style>
+    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f9ff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffffff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+        border-bottom: 2px solid #84d1fa;
+        z-index: 10;
+        box-sizing: border-box;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        color: #5ab4e6;
+        font-size: 24px;
+        font-weight: bold;
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .logo-link:hover {
+        opacity: 0.8;
+    }
+
+    .app-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
+    nav {
+        width: 250px;
+        background-color: #ffffff;
+        padding: 20px 0;
+        border-right: 1px solid #d1eeff;
+        box-shadow: 2px 0 5px rgba(132, 209, 250, 0.03);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .nav-button {
+        background: none;
+        border: none;
+        padding: 15px 25px;
+        text-align: left;
+        font-size: 16px;
+        color: #444;
+        cursor: pointer;
+        width: 100%;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        transform: translateX(4px);
+    }
+
+    .nav-button.active {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        font-weight: bold;
+    }
+
+    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
+    main {
+        flex-grow: 1;
+        padding: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    /* ================= СЕКЦИЯ УПРАЖНЕНИЙ ================= */
+    .exercises-section {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+        border: 1px solid #84d1fa;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .exercises-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8f7ff;
+    }
+
+    .exercises-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 22px;
+    }
+
+    .btn-submit {
+        background-color: #84d1fa;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #5ab4e6;
+    }
+
+    .btn-add {
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    /* Зона со скроллом для списка */
+    .exercises-list-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 15px;
+        min-height: 0;
+    }
+
+    /* Кастомный скроллбар */
+    .exercises-list-container::-webkit-scrollbar { width: 6px; }
+    .exercises-list-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .exercises-list-container::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
+    .exercises-list-container::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
+
+    /* Плашка одного упражнения */
+    .exercise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8fbff;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 4px solid #84d1fa;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .exercise-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
+    }
+
+    /* Строка с названием упражнения и группой мышц */
+    .exercise-title-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .exercise-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Кастомный бейдж группы мышц */
+    .muscle-badge {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid #84d1fa;
+        white-space: nowrap;
+    }
+
+    .exercise-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-action {
+        display: inline-block;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .btn-view { background-color: #e8f7ff; color: #5ab4e6; }
+    .btn-view:hover { background-color: #84d1fa; color: white; }
+
+    .btn-delete { background-color: #fff0f0; color: #ff4d4d; }
+    .btn-delete:hover { background-color: #ff4d4d; color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button active" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <div class="exercises-section">
+                <div class="exercises-header">
+                    <h2>База упражнений</h2>
+                    <a href="/exercises/edit" class="btn-submit btn-add">Добавить упражнение</a>
+                </div>
+
+                <div class="exercises-list-container">
+
+                    {% if exercises %}
+                        {% for ex in exercises %}
+                        <div class="template-item exercise-item">
+
+                            <div class="exercise-title-row">
+                                <span class="exercise-name">{{ ex.name }}</span>
+                                <span class="muscle-badge">{{ ex.muscle }}</span>
+                            </div>
+
+                            <div class="exercise-actions">
+                                <a href="/exercises/edit?exercise_id={{ ex.id }}" class="btn-action btn-view">Просмотр</a>
+                                {% if ex.u_id != 1%}
+                                    <form action="/exercises/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Удалить это упражнение из базы?');">
+                                        <input type="hidden" name="exercise_id" value="{{ ex.id }}">
+                                        <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>

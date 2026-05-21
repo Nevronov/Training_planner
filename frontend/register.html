@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f7ff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .reg-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(132, 209, 250, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #84d1fa;
+        }
+
+        h2 {
+            color: #5ab4e6;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #84d1fa;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #5ab4e6;
+        }
+
+        input::placeholder {
+            color: #a9a9a9;
+        }
+
+        /* Поле для ошибок (изначально пустое) */
+        .error-label {
+            color: #ff4d4d;
+            font-size: 14px;
+            min-height: 20px; /* Чтобы поле занимало место, даже если пустое */
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .btn-reg {
+            width: 100%;
+            padding: 14px;
+            background-color: #84d1fa;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-reg:hover {
+            background-color: #5ab4e6;
+        }
+
+        .login-link {
+            display: block;
+            margin-top: 20px;
+            color: #5ab4e6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="reg-container">
+        <h2>Регистрация</h2>
+        
+        <form action="/register" method="POST">
+            <div class="input-group">
+                <input type="text" name="u_name" value="{{ u_name }}" placeholder="Имя пользователя" required>
+            </div>
+            <div class="input-group">
+                <input type="number" name="u_weight" min="10" max="500" value="{{ '' if u_weight is none else u_weight }}"
+                       placeholder="Вес тела (кг)">
+            </div>
+            <div class="input-group">
+                <input type="text" name="u_login" value="{{ u_login }}" placeholder="Логин" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="u_password" value="" placeholder="Пароль" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="u_confirm_password" value="" placeholder="Повтор пароля" required>
+            </div>
+
+            <p id="status-label" style="color: {{ label_color }}; font-size: 16px; margin-bottom: 15px;">
+                {{ message }}
+            </p>
+            
+            <button type="submit" class="btn-reg">Регистрация</button>
+            
+            <a href="/login" class="login-link">Уже зарегистрированы? Войти</a>
+        </form>
+    </div>
+
+</body>
+</html>

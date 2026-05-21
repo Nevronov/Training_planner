@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шаблоны тренировок</title>
+    <style>
+    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f9ff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffffff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+        border-bottom: 2px solid #84d1fa;
+        z-index: 10;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        color: #5ab4e6;
+        font-size: 24px;
+        font-weight: bold;
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .logo-link:hover {
+        opacity: 0.8;
+    }
+
+    .app-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
+    nav {
+        width: 250px;
+        background-color: #ffffff;
+        padding: 20px 0;
+        border-right: 1px solid #d1eeff;
+        box-shadow: 2px 0 5px rgba(132, 209, 250, 0.03);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nav-button {
+        background: none;
+        border: none;
+        padding: 15px 25px;
+        text-align: left;
+        font-size: 16px;
+        color: #444;
+        cursor: pointer;
+        width: 100%;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        transform: translateX(4px);
+    }
+
+    .nav-button.active {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        font-weight: bold;
+    }
+
+    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
+    main {
+        flex-grow: 1;
+        padding: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ================= СЕКЦИЯ ШАБЛОНОВ ================= */
+    .templates-section {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+        border: 1px solid #84d1fa;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .templates-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8f7ff;
+    }
+
+    .templates-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 22px;
+    }
+
+    .btn-submit {
+        background-color: #84d1fa;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #5ab4e6;
+    }
+
+    .btn-add {
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    /* Зона со скроллом для списка */
+    .templates-list-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 15px;
+        min-height: 0;
+    }
+
+    /* Кастомный скроллбар */
+    .templates-list-container::-webkit-scrollbar { width: 6px; }
+    .templates-list-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .templates-list-container::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
+    .templates-list-container::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
+
+    .templates-scrollbar-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        min-height: 0;
+        border: 1px solid #e8f7ff;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #fcfdfe;
+    }
+
+    /* Плашка одного шаблона */
+    .template-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8fbff;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 4px solid #84d1fa;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .template-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
+    }
+
+    .template-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .template-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-action {
+        display: inline-block;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .btn-view { background-color: #e8f7ff; color: #5ab4e6; }
+    .btn-view:hover { background-color: #7fc7ff; color: white; }
+
+    .btn-delete { background-color: #fff0f0; color: #ff4d4d; }
+    .btn-delete:hover { background-color: #ff4d4d; color: white; }
+</style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button active" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <div class="templates-section">
+                <div class="templates-header">
+                    <h2>Шаблоны тренировок</h2>
+                    <a href="/templates/edit" class="btn-submit btn-add">Создать новый шаблон</a>
+                </div>
+
+                <div class="templates-list-container">
+
+                    {% if templates %}
+                        {% for template in templates %}
+                        <div class="template-item">
+                            <div class="template-info">
+                                <span class="template-title">{{ template.name }}</span>
+                            </div>
+
+                            <div class="template-actions">
+                                <a href="/templates/edit?workout_id={{ template.id }}" class="btn-action btn-view">Просмотр</a>
+
+                                <form action="/templates/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Удалить этот шаблон?');">
+                                    <input type="hidden" name="template_id" value="{{ template.id }}">
+                                    <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>

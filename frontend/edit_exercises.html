@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление упражнением</title>
+    <style>
+    /* ================= БАЗОВЫЕ СТИЛИ И КАРКАС ================= */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f9ff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffffff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+        border-bottom: 2px solid #84d1fa;
+        z-index: 10;
+        box-sizing: border-box;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        color: #5ab4e6;
+        font-size: 24px;
+        font-weight: bold;
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .logo-link:hover {
+        opacity: 0.8;
+    }
+
+    .app-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    /* ================= БОКОВАЯ ПАНЕЛЬ НАВИГАЦИИ ================= */
+    nav {
+        width: 250px;
+        background-color: #ffffff;
+        padding: 20px 0;
+        border-right: 1px solid #d1eeff;
+        box-shadow: 2px 0 5px rgba(132, 209, 250, 0.03);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .nav-button {
+        background: none;
+        border: none;
+        padding: 15px 25px;
+        text-align: left;
+        font-size: 16px;
+        color: #444;
+        cursor: pointer;
+        width: 100%;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        transform: translateX(4px);
+    }
+
+    .nav-button.active {
+        background-color: #e8f7ff;
+        color: #5ab4e6;
+        border-left: 4px solid #84d1fa;
+        font-weight: bold;
+    }
+
+    /* ================= ЦЕНТРАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ ================= */
+    main {
+        flex-grow: 1;
+        padding: 30px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ================= ФОРМА РЕДАКТИРОВАНИЯ ================= */
+    .template-form {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+        border: 1px solid #84d1fa;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .template-form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e8f7ff;
+    }
+
+    .template-main-title-input {
+        margin: 0;
+        color: #333;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: left;
+        border: none;
+        background: transparent;
+        outline: none;
+        border-bottom: 2px solid #d1eeff;
+        padding: 6px 0;
+        flex-grow: 1;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: border-color 0.2s ease;
+    }
+
+    .template-main-title-input:focus {
+        border-bottom: 2px solid #84d1fa;
+        color: #000;
+    }
+
+    .template-main-title-input:disabled {
+        border-bottom: 2px solid transparent;
+        color: #555;
+        cursor: not-allowed;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .btn-header {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .btn-save { background-color: #84d1fa; color: white; }
+    .btn-save:hover { background-color: #5ab4e6; }
+
+    .admin-notice {
+        background-color: #f8fbff;
+        color: #7f8c8d;
+        border: 1px solid #d1eeff;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .template-description-field {
+        width: 100%;
+        height: 100px;
+        min-height: 60px;
+        max-height: 100px;
+        padding: 12px;
+        border: 2px solid #84d1fa;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        box-sizing: border-box;
+        resize: vertical;
+        margin-bottom: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .template-description-field:focus {
+        border-color: #5ab4e6;
+        box-shadow: 0 0 8px rgba(132, 209, 250, 0.4);
+    }
+
+    .template-description-field:disabled {
+        background-color: #fafafa;
+        color: #666;
+        cursor: not-allowed;
+        border-color: #d1eeff;
+    }
+
+    /* ================= КОМПОНЕНТ СЕКЦИЙ УПРАЖНЕНИЯ ================= */
+    .exercise-section-title {
+        margin: 0 0 12px 0;
+        color: #5ab4e6;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* Кнопки групп мышц */
+    .muscle-btn-container {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .muscle-toggle-btn {
+        background-color: #ffffff;
+        color: #5ab4e6;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 8px 20px;
+        border-radius: 20px;
+        border: 2px solid #84d1fa;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .muscle-toggle-btn:hover:not(:disabled) {
+        background-color: #e8f7ff;
+        transform: translateY(-1px);
+        border-color: #5ab4e6;
+    }
+
+    .muscle-toggle-btn.selected {
+        background-color: #5ab4e6;
+        color: white;
+        border-color: #5ab4e6;
+    }
+
+    .muscle-toggle-btn.blocked {
+        background-color: #f5f5f5;
+        color: #bbb;
+        border-color: #e0e0e0;
+        opacity: 0.6;
+    }
+
+    .muscle-toggle-btn:disabled {
+        cursor: not-allowed;
+    }
+
+    /* ================= БЛОК СВЯЗАННЫХ ШАБЛОНОВ ================= */
+    .related-templates-section {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .templates-scrollbar-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #d1eeff;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #fcfdfe;
+    }
+
+    .templates-scrollbar-list::-webkit-scrollbar { width: 6px; }
+    .templates-scrollbar-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .templates-scrollbar-list::-webkit-scrollbar-thumb { background: #84d1fa; border-radius: 10px; }
+    .templates-scrollbar-list::-webkit-scrollbar-thumb:hover { background: #5ab4e6; }
+
+    .workout-item {
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 12px 18px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #d1eeff;
+        border-left: 4px solid #84d1fa;
+        gap: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .workout-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(132, 209, 250, 0.2);
+    }
+
+    .workout-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-view { background-color: #e8f7ff; color: #5ab4e6; }
+    .btn-view:hover { background-color: #84d1fa; color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button active" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <form action="/exercises/edit" method="POST" class="template-form">
+                {% if exercise %}
+                    <input type="hidden" name="exercise_id" value="{{ e_id }}">
+                {% endif %}
+
+                <input type="hidden" name="e_muscle" id="selected-muscle" value="{{ e_muscle if e_muscle else '' }}">
+
+                <div class="template-form-header">
+                    <input type="text"
+                           name="e_name"
+                           class="template-main-title-input"
+                           placeholder="Название упражнения"
+                           value="{{ e_name if e_name else '' }}"
+                           {% if e_user == 1 %}disabled{% endif %}
+                           minlength="3"
+                           maxlength="30"
+                           required>
+
+                    <div class="header-actions">
+                        {% if e_user == 1 %}
+                            <span class="admin-notice">Режим просмотра</span>
+                        {% else %}
+                            <button type="submit" class="btn-header btn-save">Сохранить</button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <textarea name="e_description"
+                          class="template-description-field"
+                          placeholder="Описание техники выполнения упражнения..."
+                          {% if user_id == 1 %}disabled{% endif %}>{{ e_description if e_description else '' }}</textarea>
+
+                <div class="muscle-selection-section">
+                    <h3 class="exercise-section-title">Целевая группа мышц</h3>
+                    <div class="muscle-btn-container">
+                        {% if all_muscle_groups %}
+                            {% for mg in all_muscle_groups %}
+                                <button type="button"
+                                        class="muscle-toggle-btn"
+                                        data-id="{{ mg.id }}"
+                                        onclick="selectMuscleGroup('{{ mg.id }}')"
+                                        {% if user_id == 1 %}disabled{% endif %}>
+                                    {{ mg.name }}
+                                </button>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="related-templates-section">
+                    <h3 class="exercise-section-title">Используется в ваших шаблонах</h3>
+                    <div class="templates-scrollbar-list">
+                        {% if related_workouts %}
+                            {% for workout in related_workouts %}
+                            <div class="workout-item">
+                                <span class="workout-title">{{ workout.name }}</span>
+
+                                <button type="button"
+                                        class="btn-action btn-view"
+                                        onclick="location.href='/templates/edit?workout_id={{ workout.id }}'">
+                                    Просмотр
+                                </button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #999; margin-top: 20px;">Это упражнение пока не используется ни в одном из ваших шаблонов.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        // Функция выбора и изоляции групп мышц
+        function selectMuscleGroup(muscleId) {
+            // Если администратор, то клики полностью игнорируются бэкендом, но добавим подстраховку на фронте
+            {% if user_id == 1 %} return; {% endif %}
+
+            const hiddenInput = document.getElementById('selected-muscle');
+            const buttons = document.querySelectorAll('.muscle-toggle-btn');
+
+            // Повторный клик по активной кнопке сбрасывает выбор и разблокирует остальные
+            if (hiddenInput.value == muscleId) {
+                hiddenInput.value = '';
+                buttons.forEach(btn => {
+                    btn.classList.remove('selected', 'blocked');
+                    btn.disabled = false;
+                });
+                return;
+            }
+
+            // Фиксация выбора группы мышц и блокировка неактивных элементов
+            hiddenInput.value = muscleId;
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-id') == muscleId) {
+                    btn.classList.add('selected');
+                    btn.classList.remove('blocked');
+                    btn.disabled = false;
+                } else {
+                    btn.classList.remove('selected');
+                    btn.classList.add('blocked');
+                    btn.disabled = true; // Полное отключение взаимодействия
+                }
+            });
+        }
+
+        // Инициализация интерфейса при загрузке страницы (восстановление выбранной группы мышц)
+        document.addEventListener("DOMContentLoaded", function() {
+            const initialMuscleId = document.getElementById('selected-muscle').value;
+
+            if (initialMuscleId) {
+                const buttons = document.querySelectorAll('.muscle-toggle-btn');
+                buttons.forEach(btn => {
+                    const currentId = btn.getAttribute('data-id');
+                    if (currentId == initialMuscleId) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.add('blocked');
+                        // Если зашел обычный пользователь, блокируем неактивные кнопки.
+                        // Если зашел админ (user_id == 1), они уже выключены сервером через тег disabled.
+                        {% if user_id != 1 %}
+                            btn.disabled = true;
+                        {% endif %}
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

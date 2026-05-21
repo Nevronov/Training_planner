@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Базовые стили (такие же, как на главной) */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f9ff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+            border-bottom: 2px solid #84d1fa;
+            z-index: 10;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            color: #5ab4e6;
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .logo-link:hover {
+            opacity: 0.8;
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        nav {
+            background-color: #ffffff;
+            width: fit-content;
+            min-width: 250px;
+            border-right: 1px solid #d1eeff;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            text-align: left;
+            font-size: 16px;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-button:hover {
+            background-color: #e8f7ff;
+            color: #5ab4e6;
+            border-left: 4px solid #84d1fa;
+        }
+
+        /* Выделение текущей страницы */
+        .nav-button.active {
+            background-color: #e8f7ff;
+            color: #5ab4e6;
+            border-left: 4px solid #84d1fa;
+            font-weight: bold;
+        }
+
+        /* Центральный контент (Профиль) */
+        main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .profile-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+            border: 1px solid #84d1fa;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+        }
+
+        /* Верхний блок: Аватарка + Имя */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8f7ff;
+        }
+
+        .avatar-box {
+            width: 90px;
+            height: 90px;
+            background-color: #e8f7ff;
+            border: 2px dashed #84d1fa;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #5ab4e6;
+            font-size: 32px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .user-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        /* Блок для контейнера с гистограммой веса */
+        .chart-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8f7ff;
+        }
+
+        .chart-section h3 {
+            color: #5ab4e6;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        /* Форма смены пароля */
+        .password-section h3 {
+            color: #5ab4e6;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #84d1fa;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #5ab4e6;
+        }
+
+        /* Динамическая метка для ошибок/успеха */
+        .status-label {
+            font-size: 14px;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #84d1fa;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #5ab4e6;
+        }
+        /* Стили для блока статистики */
+        .stats-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8f7ff;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #444444;
+        }
+
+        .stats-label {
+            font-weight: 500;
+        }
+
+        .stats-value {
+            font-weight: bold;
+            color: #5ab4e6;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo-link">Планировщик тренировок</a>
+    </header>
+
+    <div class="app-container">
+
+        <nav>
+            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
+            <button class="nav-button" onclick="location.href='/templates'">Шаблоны тренировок</button>
+            <button class="nav-button" onclick="location.href='/exercises'">Упражнения</button>
+            <button class="nav-button active" onclick="location.href='/profile'">Профиль</button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+        </nav>
+
+        <main>
+            <div class="profile-container">
+
+                <div class="profile-header">
+                    <div class="avatar-box">
+                        {{ u_name[0] | upper if u_name else 'U' }}
+                    </div>
+                    <div class="user-name">{{ u_name }}</div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>Динамика изменения веса</h3>
+                    <canvas id="weightChart" width="100%" height="50"></canvas>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-row">
+                        <span class="stats-label">Всего тренировок:</span>
+                        <span class="stats-value">{{ total_workouts if total_workouts is not none else 0 }}</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Дата последней тренировки:</span>
+                        <span class="stats-value">{{ last_workout_date if last_workout_date else 'Нет тренировок' }}</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" name="new_weight" form="profileForm" min="10"
+                                               max="500" step="0.1" placeholder="Текущий вес (кг)">
+                    </div>
+                </div>
+
+                <div class="password-section">
+                    <h3>Смена пароля</h3>
+
+                    <form id="profileForm" action="/profile" method="POST">
+                        <div class="input-group">
+                            <input type="password" name="old_password" placeholder="Старый пароль">
+                        </div>
+                        <div class="input-group">
+                          <input type="password" name="new_password" placeholder="Новый пароль" minlength="3" maxlength="25">
+                        </div>
+
+                        <div class="status-label" id="status-label" style="color: {{ label_color }};">
+                            {{ message }}
+                        </div>
+
+                        <button type="submit" class="btn-submit">Принять</button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('weightChart').getContext('2d');
+
+        // Jinja2 подставит сюда списки из вашего FastAPI бэкенда.
+        // Если данных нет, по умолчанию отобразятся пустые массивы.
+        const dateLabels = {{ weight_dates | tojson if weight_dates else '[]' }};
+        const weightData = {{ weight_values | tojson if weight_values else '[]' }};
+
+        const weightChart = new Chart(ctx, {
+            type: 'bar', // Тип графика: гистограмма (столбцы)
+            data: {
+                labels: dateLabels, // Даты снизу под столбцами
+                datasets: [{
+                    label: 'Вес (кг)',
+                    data: weightData, // Значения веса
+                    backgroundColor: '#84d1fa', // Светло-голубой цвет столбцов
+                    borderColor: '#5ab4e6', // Темно-голубая рамка
+                    borderWidth: 1,
+                    borderRadius: 4, // Закругление вершин столбцов
+                    barThickness: 25,
+                    minBarLength: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false, // Чтобы график красиво масштабировался вокруг веса пользователя (например от 50 до 100), а не уходил в бесконечность от 0
+                        title: {
+                            display: true,
+                            text: 'КГ'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата замера'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Скрываем легенду, так как у нас всего один параметр (Вес)
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
