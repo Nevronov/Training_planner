@@ -18,8 +18,15 @@ create table Workouts
   w_id integer primary key autoincrement,
   w_user integer references users(u_id) not null,
   w_name text not null,
-  w_description text,
-  w_date_time text
+  w_description text
+);
+
+create table Conducting_Workouts
+(
+  wc_id integer primary key autoincrement,
+  wc_date text,
+  wc_workout integer references workouts(w_id) not null,
+  wc_status integer default 0
 );
 
 create table Muscle_groups
