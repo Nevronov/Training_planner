@@ -17,3 +17,20 @@ Frontend: HTML, CSS, шаблонизатор Jinja2
 Валидация данных: Pydantic
 Безопасность: hashlib, bcrypt
   
+Быстрый старт
+Склонируйте репозиторий:
+
+git clone https://github.com/Nevronov/Training_planner.git
+Перейдите в папку проекта и создайте виртуальное окружение:
+
+cd Training_planner
+python -m venv .venv
+Активируйте виртуальное окружение и установите зависимости:
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+Запустите сервер:
+
+Bash
+uvicorn main:app --reload
+После запуска приложение будет доступно по адресу: http://127.0.0.1:8000
