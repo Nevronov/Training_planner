@@ -54,8 +54,11 @@ async def check_password(request: Request, check_input: LoginInput = Depends(log
     u_data = sql.select(con,f"""SELECT u_password, u_id FROM Users
                   WHERE u_login = '{check_input.u_login}'""")
     con.close()
-    ver_pas = not verify_password(check_input.u_password, u_data[0][0])
-    if len(u_data) == 0 or ver_pas:
+    try:
+        print(u_data)
+        ver_pas = not verify_password(check_input.u_password, u_data[0][0])
+        if ver_pas: raise IndexError
+    except IndexError:
         return templates.TemplateResponse(request=request, name="login.html",
                                           context={"message": "Неверный логин или пароль"})
     else:
@@ -166,11 +169,11 @@ async def get_register_page(request: Request):
 
 def data_profile(current_user):
     con = sql.connection()
-    u_data = sql.select(con, f"""SELECT u_name, COUNT(w_id),
+    u_data = sql.select(con, f"""sELECT u_name, COUNT(w_id),
                                     MAX(wc_date) FROM Users
                                     LEFT JOIN Workouts ON Users.u_id = Workouts.w_user
                                     LEFT JOIN Conducting_Workouts ON Conducting_Workouts.wc_workout = Workouts.w_id
-                                    WHERE u_id = {current_user} and wc_status
+                                    WHERE u_id = {current_user}
                                     GROUP BY u_id, u_name""")
     w_data = sql.select(con, f"""select wl_weight, wl_date from Weight_logs
                                              where wl_user = {current_user}
@@ -183,8 +186,10 @@ def data_profile(current_user):
     date = None
     print(current_user)
     print(u_data)
-    if u_data[0][2] is not None:
+    try:
         date = u_data[0][2][:10]
+    except:
+        pass
     return u_data[0][0], u_data[0][1], date, weight_dates, weight_values
 
 @app.get("/profile", response_class=HTMLResponse)
@@ -483,11 +488,9 @@ async def get_calendar_page(request: Request, current_user = Depends(get_cookie_
                                                 Join Workouts on Workouts.w_id = Conducting_Workouts.wc_workout
                                                 WHERE Workouts.w_user = {current_user}""")
     scheduled_workouts = []
-    print(cont_workouts)
     for sch in cont_workouts:
         scheduled_workouts.append({'id': sch[0], 'date': sch[1], 'name': sch[2], 'completed': bool(sch[4]), 'template_id': sch[3]})
     con.close()
-    print(scheduled_workouts)
     return templates.TemplateResponse(request=request, name="calendar.html", context={'templates': templ, 'scheduled_workouts': scheduled_workouts})
 
 @app.post('/calendar/delete')
@@ -510,9 +513,11 @@ async def update_conducting_workouts(status: bool = Form(None), id: int = Form(N
     return RedirectResponse(url=f"/calendar", status_code=303)
 
 @app.post('/calendar/save')
-async def add_conducting_workouts(template_id : int = Form(None), current_user = Depends(get_cookie_user)):
+async def add_conducting_workouts(request: Request, date: str = Form(...),
+    template_id: int = Form(...), current_user = Depends(get_cookie_user)):
     con = sql.connection()
-    sql.insert(con, 'conducting_workouts', [template_id, datetime.datetime.now().strftime('%Y-%m-%d'), False])
+    print(template_id, date, False,'\nZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ')
+    sql.insert(con, 'conducting_workouts', [template_id, date, False])
     con.close()
     return RedirectResponse(url=f"/calendar", status_code=303)
 
