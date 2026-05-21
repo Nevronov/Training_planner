@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная</title>
+    <title>Главная - Планировщик тренировок</title>
     <style>
         /* Общие настройки страницы */
         body, html {
@@ -11,7 +11,7 @@
             padding: 0;
             height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f9ff;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e8f7ff 100%);
             display: flex;
             flex-direction: column;
         }
@@ -20,18 +20,22 @@
         header {
             background-color: #ffffff;
             padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(132, 209, 250, 0.2);
+            box-shadow: 0 2px 15px rgba(132, 209, 250, 0.3);
             border-bottom: 2px solid #84d1fa;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Название как скрытая кнопка-ссылка */
         .logo-link {
             text-decoration: none;
             color: #5ab4e6;
             font-size: 24px;
             font-weight: bold;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             transition: opacity 0.3s;
         }
 
@@ -39,79 +43,472 @@
             opacity: 0.8;
         }
 
+        .logo-icon {
+            font-size: 30px;
+        }
+
+        .header-badge {
+            background: linear-gradient(135deg, #84d1fa, #5ab4e6);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
         /* Контейнер для нижней части (Меню + Контент) */
         .app-container {
             display: flex;
-            flex: 1; /* Растягивается на всю оставшуюся высоту */
+            flex: 1;
+            overflow: hidden;
         }
 
         /* Боковая панель (Сайдбар) */
         nav {
             background-color: #ffffff;
-            width: fit-content; /* Ширина по контенту */
-            min-width: 250px;
+            width: 260px;
+            min-width: 260px;
             border-right: 1px solid #d1eeff;
             display: flex;
             flex-direction: column;
             padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(132, 209, 250, 0.1);
         }
 
-        /* Кнопки меню */
         .nav-button {
             background: none;
             border: none;
             padding: 15px 25px;
             text-align: left;
-            font-size: 16px;
-            color: #444;
+            font-size: 15px;
+            color: #555;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            border-left: 4px solid transparent; /* Заготовка под выделение */
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
         }
 
-        /* Эффект при наведении */
+        .nav-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
         .nav-button:hover {
             background-color: #e8f7ff;
             color: #5ab4e6;
             border-left: 4px solid #84d1fa;
+            transform: translateX(-2px);
+        }
+
+        .nav-button.active {
+            background-color: #e8f7ff;
+            color: #5ab4e6;
+            border-left-color: #84d1fa;
+            font-weight: bold;
         }
 
         /* Основная область контента */
         main {
             flex: 1;
-            padding: 40px;
+            padding: 30px 40px;
+            overflow-y: auto;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
         }
 
-        .empty-state {
-            color: #b0d4e3;
-            font-size: 20px;
-            font-style: italic;
+        .content-wrapper {
+            max-width: 900px;
+            width: 100%;
         }
+
+        /* Секция приветствия */
+        .welcome-section {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(132, 209, 250, 0.2);
+            border: 1px solid #d1eeff;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            color: #333;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #888;
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+        }
+
+        .welcome-emoji {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        /* Карточки возможностей */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+            border: 1px solid #e8f7ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(132, 209, 250, 0.3);
+            border-color: #84d1fa;
+        }
+
+        .feature-icon {
+            font-size: 45px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .feature-description {
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Секция технологий */
+        .tech-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+            border: 1px solid #e8f7ff;
+        }
+
+        .tech-title {
+            font-size: 22px;
+            color: #333;
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+        }
+
+        .tech-item {
+            background: linear-gradient(135deg, #f0f9ff, #e8f7ff);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #d1eeff;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: linear-gradient(135deg, #e8f7ff, #d1eeff);
+            transform: scale(1.05);
+        }
+
+        .tech-name {
+            font-weight: 700;
+            color: #5ab4e6;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .tech-version {
+            font-size: 11px;
+            color: #999;
+            margin: 0;
+        }
+
+        /* Секция статистики */
+        .stats-section {
+            background: linear-gradient(135deg, #84d1fa, #5ab4e6);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: 0 8px 25px rgba(132, 209, 250, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 15px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 5px 0 0 0;
+            font-weight: 500;
+        }
+
+        /* Секция с GitHub */
+        .github-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(132, 209, 250, 0.15);
+            border: 1px solid #e8f7ff;
+            text-align: center;
+        }
+
+        .github-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #24292e;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .github-button:hover {
+            background: #1b1f23;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .quick-start {
+            background: #f8fbff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px dashed #84d1fa;
+        }
+
+        .quick-start h3 {
+            color: #5ab4e6;
+            margin: 0 0 15px 0;
+            font-size: 17px;
+        }
+
+        .quick-start ol {
+            margin: 0;
+            padding-left: 20px;
+            color: #555;
+            line-height: 2;
+            font-size: 14px;
+        }
+
+        .quick-start code {
+            background: #e8f7ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #5ab4e6;
+            font-weight: 600;
+        }
+
+        /* Футер */
+        .footer-note {
+            text-align: center;
+            color: #b0d4e3;
+            font-size: 12px;
+            padding: 20px 0;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="/" class="logo-link">Планировщик тренировок</a>
+        <a href="/" class="logo-link">
+            Планировщик тренировок
+        </a>
     </header>
 
     <div class="app-container">
 
         <nav>
-            <button class="nav-button" onclick="location.href='/calendar'">Календарь</button>
-            <button class="nav-button" onclick="location.href='/templates'">Шаблоны тренировок</button>
-            <button class="nav-button" onclick="location.href='/exercises'">Упражнения</button>
-            <button class="nav-button" onclick="location.href='/profile'">Профиль</button>
-            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">Выход</button>
+            <button class="nav-button" onclick="location.href='/calendar'">
+                Календарь
+            </button>
+            <button class="nav-button" onclick="location.href='/templates'">
+                Шаблоны тренировок
+            </button>
+            <button class="nav-button" onclick="location.href='/exercises'">
+                Упражнения
+            </button>
+            <button class="nav-button" onclick="location.href='/profile'">
+                Профиль
+            </button>
+            <button class="nav-button" onclick="location.href='/logout'" style="margin-top: auto; color: #ff4d4d;">
+                Выход
+            </button>
         </nav>
 
         <main>
-            <div class="empty-state">
-                Здесь пока ничего нет. Выберите раздел в меню слева.
+            <div class="content-wrapper">
+
+                <!-- Приветственная секция -->
+                <div class="welcome-section animate">
+                    <h1 class="welcome-title">Добро пожаловать в Планировщик тренировок!</h1>
+                    <p class="welcome-subtitle">
+                        Ваш персональный помощник в мире фитнеса.<br>
+                        Планируйте, отслеживайте и достигайте своих целей с умом.
+                    </p>
+                </div>
+
+                <!-- Карточки возможностей -->
+                <div class="features-grid">
+                    <div class="feature-card animate delay-1" onclick="location.href='/calendar'">
+                        <span class="feature-icon">📅</span>
+                        <h3 class="feature-title">Календарь тренировок</h3>
+                        <p class="feature-description">
+                            Наглядный месячный календарь с цветовой индикацией статуса тренировок.
+                            Красные — пропущенные, зелёные — выполненные, серые — запланированные.
+                        </p>
+                    </div>
+
+                    <div class="feature-card animate delay-1" onclick="location.href='/templates'">
+                        <span class="feature-icon">📋</span>
+                        <h3 class="feature-title">Шаблоны тренировок</h3>
+                        <p class="feature-description">
+                            Создавайте и сохраняйте шаблоны тренировок. Комбинируйте упражнения,
+                            указывайте количество подходов и рабочие веса.
+                        </p>
+                    </div>
+
+                    <div class="feature-card animate delay-2" onclick="location.href='/exercises'">
+                        <span class="feature-icon">💪</span>
+                        <h3 class="feature-title">База упражнений</h3>
+                        <p class="feature-description">
+                            Обширный каталог упражнений с привязкой к группам мышц.
+                            Добавляйте собственные упражнения с подробным описанием.
+                        </p>
+                    </div>
+
+                    <div class="feature-card animate delay-2" onclick="location.href='/profile'">
+                        <span class="feature-icon">📊</span>
+                        <h3 class="feature-title">Отслеживание прогресса</h3>
+                        <p class="feature-description">
+                            Ведите журнал веса, отслеживайте динамику и анализируйте
+                            свои достижения с помощью графиков и статистики.
+                        </p>
+                    </div>
+
+                    <div class="feature-card animate delay-3">
+                        <span class="feature-icon">🎯</span>
+                        <h3 class="feature-title">Система статусов</h3>
+                        <p class="feature-description">
+                            Отмечайте выполненные тренировки одним кликом.
+                            Система автоматически подсветит пропуски красным цветом.
+                        </p>
+                    </div>
+
+                    <div class="feature-card animate delay-3">
+                        <span class="feature-icon">🔒</span>
+                        <h3 class="feature-title">Безопасность данных</h3>
+                        <p class="feature-description">
+                            Авторизация через cookies, защита паролей и персональные данные.
+                            Каждый пользователь видит только свою информацию.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- GitHub и установка -->
+                <div class="github-section animate delay-3">
+                    <h2 style="color: #333; margin: 0 0 10px 0;"> Начните использовать прямо сейчас</h2>
+                    <p style="color: #888; font-size: 14px; margin: 0;">
+                        Проект с открытым исходным кодом на GitHub
+                    </p>
+                    <a href="https://github.com/Nevronov/Training_planner" target="_blank" class="github-button">
+                        <span style="font-size: 20px;">⭐</span>
+                        Перейти в репозиторий
+                        <span style="font-size: 20px;">→</span>
+                    </a>
+
+                    <div class="quick-start">
+                        <h3>⚡ Быстрый старт (3 простых шага)</h3>
+                        <ol>
+                            <li>Клонируйте репозиторий:<br>
+                                <code>git clone https://github.com/Nevronov/Training_planner.git</code>
+                            </li>
+                            <li>Установите зависимости:<br>
+                                <code>pip install -r requirements.txt</code>
+                            </li>
+                            <li>Запустите сервер:<br>
+                                <code>python main.py</code> или <code>uvicorn main:app --reload</code>
+                            </li>
+                        </ol>
+                        <p style="color: #888; font-size: 13px; margin: 15px 0 0 0;">
+                            📌 Откройте браузер и перейдите по адресу: <code>http://localhost:8000</code>
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </main>
 
