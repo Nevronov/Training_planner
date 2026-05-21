@@ -7,9 +7,10 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, Field, ValidationError
 import uvicorn
 from database import sql
-from pyexpat.errors import messages
-from sqlite3 import Error
 import datetime
+
+import hashlib
+import bcrypt
 
 app = FastAPI()
 
@@ -53,7 +54,8 @@ async def check_password(request: Request, check_input: LoginInput = Depends(log
     u_data = sql.select(con,f"""SELECT u_password, u_id FROM Users
                   WHERE u_login = '{check_input.u_login}'""")
     con.close()
-    if len(u_data) == 0 or u_data[0][0] != check_input.u_password:
+    ver_pas = not verify_password(check_input.u_password, u_data[0][0])
+    if len(u_data) == 0 or ver_pas:
         return templates.TemplateResponse(request=request, name="login.html",
                                           context={"message": "Неверный логин или пароль"})
     else:
@@ -61,6 +63,29 @@ async def check_password(request: Request, check_input: LoginInput = Depends(log
         response = RedirectResponse(url='/', status_code=303)
         response.set_cookie(key="user_id", value=u_data[0][1], httponly=True)
         return response
+
+### ХЕШИРОВАНИЕ ПАРОЛЯ
+
+def hash_password(password: str):
+    # 1. Хэшируем в SHA-256 (выдает 64 символа)
+    sha256_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    # 2. Генерируем соль и хэшируем через чистый bcrypt
+    # переводя строку SHA-256 в байты перед этим
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(sha256_hash.encode('utf-8'), salt)
+
+    # Возвращаем строкой для сохранения в БД
+    return hashed.decode('utf-8')
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # 1. Повторяем SHA-256 для проверяемого пароля
+    sha256_hash = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+
+    # 2. Проверяем соответствие через bcrypt
+    # Обязательно кодируем обе строки в байты для библиотеки
+    return bcrypt.checkpw(sha256_hash.encode('utf-8'), hashed_password.encode('utf-8'))
 
 ### УПРАВЛЕНИЕ СТРАНИЦЕЙ РЕГИСТРАЦИЯ
 
@@ -95,7 +120,10 @@ async def registration(request: Request):
             return templates.TemplateResponse(request=request, name="register.html", context={
                 "message": "Логин занят", "u_name": register.u_name, "u_weight": register.u_weight,
                 "u_login": register.u_login, "label_color": label_color})
-        sql.insert(con, 'users', [register.u_name, register.u_login, register.u_password])
+        print(register.u_password)
+        hash_pass = hash_password(register.u_password)
+        print(hash_pass)
+        sql.insert(con, 'users', [register.u_name, register.u_login, hash_pass])
         id = sql.select(con,'select u_id from Users order by u_id desc limit 1')[0][0]
         if register.u_weight != None:
             sql.insert(con,'weight_logs',[id, register.u_weight, datetime.datetime.now().strftime('%Y-%m-%d')])
@@ -138,11 +166,12 @@ async def get_register_page(request: Request):
 
 def data_profile(current_user):
     con = sql.connection()
-    u_data = sql.select(con, f"""select u_name, count(w_date_time), max(w_date_time),datetime('now', 'localtime') from Workouts
-                                        right join Users on Users.u_id = Workouts.w_user
-                                        where u_id = {current_user}
-                                        group by u_name
-                                        having w_date_time <= datetime('now', 'localtime') or w_date_time is Null""")
+    u_data = sql.select(con, f"""SELECT u_name, COUNT(w_id),
+                                    MAX(wc_date) FROM Users
+                                    LEFT JOIN Workouts ON Users.u_id = Workouts.w_user
+                                    LEFT JOIN Conducting_Workouts ON Conducting_Workouts.wc_workout = Workouts.w_id
+                                    WHERE u_id = {current_user} and wc_status
+                                    GROUP BY u_id, u_name""")
     w_data = sql.select(con, f"""select wl_weight, wl_date from Weight_logs
                                              where wl_user = {current_user}
                                              order by wl_date desc 
@@ -152,6 +181,8 @@ def data_profile(current_user):
     weight_values = [row[0] for row in w_data_reversed]
     con.close()
     date = None
+    print(current_user)
+    print(u_data)
     if u_data[0][2] is not None:
         date = u_data[0][2][:10]
     return u_data[0][0], u_data[0][1], date, weight_dates, weight_values
@@ -191,8 +222,10 @@ async def update_password(request: Request, current_user = Depends(get_cookie_us
             sql.insert(con, 'weight_logs', [current_user, passwords.new_weight, datetime.datetime.now().strftime('%Y-%m-%d')])
             status = 'weight'
         elif passwords.old_password is not None or passwords.new_password is not None:
-            if user_db[0][0] == passwords.old_password:
-                sql.update(con,'Users','u_password',f"{passwords.new_password}",f"WHERE u_id = {current_user}")
+            print(verify_password(passwords.old_password,user_db[0][0]))
+            if verify_password(passwords.old_password,user_db[0][0]):
+                hash_pass = hash_password(passwords.new_password)
+                sql.update(con,'Users','u_password',f"{hash_pass}",f"WHERE u_id = {current_user}")
                 status = 'password'
             else:
                 status = 'unpassword'
@@ -219,7 +252,7 @@ async def update_password(request: Request, current_user = Depends(get_cookie_us
 @app.get("/templates", response_class=HTMLResponse)
 async def get_templates_page(request: Request, current_user = Depends(get_cookie_user)):
     con = sql.connection()
-    workouts = sql.select(con, f'SELECT w_id, w_name FROM Workouts WHERE w_user = {current_user} AND w_date_time IS NULL')
+    workouts = sql.select(con, f'SELECT w_id, w_name FROM Workouts WHERE w_user = {current_user}')
     con.close()
     templates_list = []
     for row in workouts:
@@ -314,7 +347,7 @@ async def edit_template(request: Request,
             current_weight = float(weight[i]) if weight[i] != "" else None
             sql.insert(con, 'Exercises_list', [workout_id, e_id, current_sets, current_weight])
     else:
-        sql.insert(con, 'Workouts',[current_user, w_name, w_description, None])
+        sql.insert(con, 'Workouts',[current_user, w_name, w_description])
         w_id = sql.select(con,'select w_id from Workouts order by w_id desc limit 1')[0][0]
         for i, e_id in enumerate(exercise_ids):
             # Берем из списков элементы, которые стоят на той же позиции (i), что и текущее упражнение
@@ -346,10 +379,6 @@ async def delete_template(template_id: Optional[int] = Form(None), current_user 
     sql.delete(con, 'Workouts', f"where w_id = {template_id}")
     con.close()
     return RedirectResponse(url=f"/templates", status_code=303)
-
-@app.get("/calendar", response_class=HTMLResponse)
-async def delete_template(request: Request, current_user = Depends(get_cookie_user)):
-    return templates.TemplateResponse(request=request, name="calendar.html")
 
 @app.get("/exercises", response_class=HTMLResponse)
 async def delete_template(request: Request, current_user = Depends(get_cookie_user)):
@@ -442,6 +471,51 @@ async def edit_template(request: Request,
         sql.insert(con, 'Exercises',[e_name, e_muscle, e_description, current_user])
     con.close()
     return RedirectResponse(url=f"/exercises", status_code=303)
+
+@app.get("/calendar", response_class=HTMLResponse)
+async def get_calendar_page(request: Request, current_user = Depends(get_cookie_user)):
+    con = sql.connection()
+    workouts = sql.select(con, f"""select w_id, w_name from Workouts where w_user = {current_user}""")
+    templ = []
+    for tem in workouts:
+        templ.append({'id': tem[0], 'name': tem[1]})
+    cont_workouts = sql.select(con, f"""select wc_id, wc_date, w_name, w_id, wc_status from Conducting_Workouts
+                                                Join Workouts on Workouts.w_id = Conducting_Workouts.wc_workout
+                                                WHERE Workouts.w_user = {current_user}""")
+    scheduled_workouts = []
+    print(cont_workouts)
+    for sch in cont_workouts:
+        scheduled_workouts.append({'id': sch[0], 'date': sch[1], 'name': sch[2], 'completed': bool(sch[4]), 'template_id': sch[3]})
+    con.close()
+    print(scheduled_workouts)
+    return templates.TemplateResponse(request=request, name="calendar.html", context={'templates': templ, 'scheduled_workouts': scheduled_workouts})
+
+@app.post('/calendar/delete')
+async def delete_conducting_workouts(id: int = Form(None), current_user = Depends(get_cookie_user)):
+    con = sql.connection()
+    sql.delete(con, 'Conducting_Workouts', f'where wc_id = {id}')
+    con.close()
+    return RedirectResponse(url=f"/calendar", status_code=303)
+
+@app.post('/calendar/toggle')
+async def update_conducting_workouts(status: bool = Form(None), id: int = Form(None), current_user = Depends(get_cookie_user)):
+    con = sql.connection()
+    status = sql.select(con,f'select wc_status from Conducting_Workouts where wc_id = {id}')[0][0]
+    if status:
+        status = 0
+    else:
+        status = 1
+    sql.update(con, 'Conducting_Workouts', 'wc_status', status,f'where wc_id = {id}')
+    con.close()
+    return RedirectResponse(url=f"/calendar", status_code=303)
+
+@app.post('/calendar/save')
+async def add_conducting_workouts(template_id : int = Form(None), current_user = Depends(get_cookie_user)):
+    con = sql.connection()
+    sql.insert(con, 'conducting_workouts', [template_id, datetime.datetime.now().strftime('%Y-%m-%d'), False])
+    con.close()
+    return RedirectResponse(url=f"/calendar", status_code=303)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
