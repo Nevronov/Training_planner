@@ -15,24 +15,19 @@ import bcrypt
 app = FastAPI()
 
 templates = Jinja2Templates(directory='../frontend')
-# Исключение для проверки авторизации пользователя
 class UserNotLoggedIn(Exception):
     pass
-# Проверка авторизации пользователя
 def get_cookie_user(user_id: str = Cookie(None)):
     if user_id == None:
         raise UserNotLoggedIn()
     return int(user_id)
-# Результат выполнения, в случае захода не авторизированным
 @app.exception_handler(UserNotLoggedIn)
 async def auth_exception_handler(request: Request, exc: UserNotLoggedIn):
     return RedirectResponse(url="/login", status_code=303)
 
-# Выход из аккаунта
 @app.get("/logout")
 def logout():
     response = RedirectResponse(url="/login", status_code=303)
-    response.delete_cookie("user_login") # Удаляем «пропуск» из браузера
     return response
 
 ### УПРАВЛЕНИЕ СТРАНИЦЕЙ LOGIN
@@ -55,14 +50,12 @@ async def check_password(request: Request, check_input: LoginInput = Depends(log
                   WHERE u_login = '{check_input.u_login}'""")
     con.close()
     try:
-        print(u_data)
         ver_pas = not verify_password(check_input.u_password, u_data[0][0])
         if ver_pas: raise IndexError
     except IndexError:
         return templates.TemplateResponse(request=request, name="login.html",
                                           context={"message": "Неверный логин или пароль"})
     else:
-        # Переход на главную страницу и внесение куки
         response = RedirectResponse(url='/', status_code=303)
         response.set_cookie(key="user_id", value=u_data[0][1], httponly=True)
         return response
@@ -70,24 +63,17 @@ async def check_password(request: Request, check_input: LoginInput = Depends(log
 ### ХЕШИРОВАНИЕ ПАРОЛЯ
 
 def hash_password(password: str):
-    # 1. Хэшируем в SHA-256 (выдает 64 символа)
     sha256_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-    # 2. Генерируем соль и хэшируем через чистый bcrypt
-    # переводя строку SHA-256 в байты перед этим
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(sha256_hash.encode('utf-8'), salt)
 
-    # Возвращаем строкой для сохранения в БД
     return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # 1. Повторяем SHA-256 для проверяемого пароля
     sha256_hash = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
 
-    # 2. Проверяем соответствие через bcrypt
-    # Обязательно кодируем обе строки в байты для библиотеки
     return bcrypt.checkpw(sha256_hash.encode('utf-8'), hashed_password.encode('utf-8'))
 
 ### УПРАВЛЕНИЕ СТРАНИЦЕЙ РЕГИСТРАЦИЯ
@@ -123,9 +109,7 @@ async def registration(request: Request):
             return templates.TemplateResponse(request=request, name="register.html", context={
                 "message": "Логин занят", "u_name": register.u_name, "u_weight": register.u_weight,
                 "u_login": register.u_login, "label_color": label_color})
-        print(register.u_password)
         hash_pass = hash_password(register.u_password)
-        print(hash_pass)
         sql.insert(con, 'users', [register.u_name, register.u_login, hash_pass])
         id = sql.select(con,'select u_id from Users order by u_id desc limit 1')[0][0]
         if register.u_weight != None:
@@ -184,8 +168,6 @@ def data_profile(current_user):
     weight_values = [row[0] for row in w_data_reversed]
     con.close()
     date = None
-    print(current_user)
-    print(u_data)
     try:
         date = u_data[0][2][:10]
     except:
@@ -203,7 +185,6 @@ async def get_profile_page(request: Request, current_user = Depends(get_cookie_u
     elif ms_status == "unpassword":
         message = "Неверный пароль"
         label_color = '#ff4d4d'
-    print(message)
     data = data_profile(current_user)
     return templates.TemplateResponse(request=request, name="profile.html",
                                       context={"message": message,'u_name': data[0], 'total_workouts': data[1], 'last_workout_date': data[2],
@@ -227,7 +208,6 @@ async def update_password(request: Request, current_user = Depends(get_cookie_us
             sql.insert(con, 'weight_logs', [current_user, passwords.new_weight, datetime.datetime.now().strftime('%Y-%m-%d')])
             status = 'weight'
         elif passwords.old_password is not None or passwords.new_password is not None:
-            print(verify_password(passwords.old_password,user_db[0][0]))
             if verify_password(passwords.old_password,user_db[0][0]):
                 hash_pass = hash_password(passwords.new_password)
                 sql.update(con,'Users','u_password',f"{hash_pass}",f"WHERE u_id = {current_user}")
@@ -235,10 +215,8 @@ async def update_password(request: Request, current_user = Depends(get_cookie_us
             else:
                 status = 'unpassword'
     except ValidationError as e:
-        print(e)
         error_detail = e.errors()[0]
         error_field = error_detail['loc'][0]
-        print(e)
         label_color = '#ff4d4d'
         if error_field == 'new_weight':
             message = "Вес должен быть от 20 до 300"
@@ -252,7 +230,7 @@ async def update_password(request: Request, current_user = Depends(get_cookie_us
             con.close()
     return RedirectResponse(url=f"/profile?ms_status={status}", status_code=303)
 
-### Список шаблонов
+### Шаблоны
 
 @app.get("/templates", response_class=HTMLResponse)
 async def get_templates_page(request: Request, current_user = Depends(get_cookie_user)):
@@ -265,27 +243,31 @@ async def get_templates_page(request: Request, current_user = Depends(get_cookie
             "id": row[0],
             "name": row[1]
         })
-    print(templates_list)
     return templates.TemplateResponse(request=request, name="templates.html", context={"templates": templates_list})
-
-### Создание/редактирование шаблонов
 
 @app.get("/templates/edit", response_class=HTMLResponse)
 async def get_templates_edit_page(request: Request, current_user=Depends(get_cookie_user),
                                   workout_id: Optional[str] = None):
     con = sql.connection()
-    all_exercises_raw = sql.select(con, f"""SELECT e_id, e_name, m_name, e_description FROM Exercises 
-                                           JOIN Muscle_groups ON Exercises.e_muscle = Muscle_groups.m_id
-                                           WHERE e_user = 1 or e_user = {current_user}""")
+
+    all_exercises_raw = sql.select(con, f"""
+        SELECT e.e_id, e.e_name, e.e_description, GROUP_CONCAT(mg.m_name, ', ')
+        FROM Exercises e
+        LEFT JOIN Muscles_list ml ON e.e_id = ml.ml_exercises
+        LEFT JOIN Muscle_groups mg ON ml.ml_muscle = mg.m_id
+        WHERE e.e_user = 1 OR e.e_user = {current_user}
+        GROUP BY e.e_id, e.e_name, e.e_description
+    """)
+
     all_exercises = []
     for row in all_exercises_raw:
         all_exercises.append({
             "id": row[0],
             "name": row[1],
-            "muscle": row[2],
-            "description": row[3],
-            "default_sets": 3,  # Можно поставить жесткий дефолт или взять из базы: row[3]
-            "default_weight": 0  # Можно поставить жесткий дефолт или взять из базы: row[4]
+            "description": row[2],
+            "muscle": row[3] if row[3] else "Не указано",
+            "default_sets": 3,
+            "default_weight": 0
         })
 
     exercises_list = None
@@ -294,31 +276,40 @@ async def get_templates_edit_page(request: Request, current_user=Depends(get_coo
     w_edit = "Создать"
 
     if workout_id is not None:
-        exercises = sql.select(con, f"""SELECT e_id, e_name, m_name, el_number_of_sets, el_weight FROM Exercises_list
-                                    JOIN Exercises ON Exercises_list.el_exercises = Exercises.e_id
-                                    JOIN Muscle_groups ON Exercises.e_muscle = Muscle_groups.m_id
-                                    WHERE el_workout = {workout_id}""")
         try:
-            workout = sql.select(con,
-                                 f"""SELECT w_name, w_description, w_user FROM Workouts WHERE w_id = {workout_id}""")
+            workout = sql.select(con, f"SELECT w_name, w_description, w_user FROM Workouts WHERE w_id = {workout_id}")
+            if not workout:
+                raise Exception()
+
             user = workout[0][2]
             if user != current_user:
-                raise
+                raise Exception()
         except:
             con.close()
             return RedirectResponse(url=f"/", status_code=303)
-        if workout:
-            w_name = workout[0][0]
-            w_description = workout[0][1]
-            w_edit = "Изменить"
+
+        w_name = workout[0][0]
+        w_description = workout[0][1]
+        w_edit = "Изменить"
+
+        exercises = sql.select(con, f"""
+            SELECT e.e_id, e.e_name, el.el_number_of_sets, el.el_weight, GROUP_CONCAT(mg.m_name, ', ') 
+            FROM Exercises_list el
+            JOIN Exercises e ON el.el_exercises = e.e_id
+            LEFT JOIN Muscles_list ml ON e.e_id = ml.ml_exercises
+            LEFT JOIN Muscle_groups mg ON ml.ml_muscle = mg.m_id
+            WHERE el.el_workout = {workout_id}
+            GROUP BY el.el_id, e.e_id, e.e_name, el.el_number_of_sets, el.el_weight
+        """)
+
         exercises_list = []
         for row in exercises:
             exercises_list.append({
                 "id": row[0],
                 "name": row[1],
-                "muscle": row[2],
-                "sets": row[3],
-                "weight": row[4]
+                "sets": row[2],
+                "weight": row[3],
+                "muscle": row[4] if row[4] else "Не указано"
             })
 
     con.close()
@@ -338,16 +329,14 @@ async def edit_template(request: Request,
     workout_id: Optional[int] = Form(None),
     exercise_ids: list[int] = Form([]),
     current_user = Depends(get_cookie_user),
-    sets_count: list[str] = Form([]),            # Принимаем как строки, чтобы избежать 422 ошибки при пустом инпуте
+    sets_count: list[str] = Form([]),
     weight: list[str] = Form([])):
     con = sql.connection()
-    print(workout_id)
     if workout_id:
         sql.update(con,'Workouts','w_name', w_name,
                    f", w_description = '{w_description}' WHERE w_id = {workout_id}")
         sql.delete(con, 'Exercises_list',f"WHERE el_workout = {workout_id}")
         for i, e_id in enumerate(exercise_ids):
-            # Берем из списков элементы, которые стоят на той же позиции (i), что и текущее упражнение
             current_sets = int(sets_count[i]) if sets_count[i] != "" else 1
             current_weight = float(weight[i]) if weight[i] != "" else None
             sql.insert(con, 'Exercises_list', [workout_id, e_id, current_sets, current_weight])
@@ -355,7 +344,6 @@ async def edit_template(request: Request,
         sql.insert(con, 'Workouts',[current_user, w_name, w_description])
         w_id = sql.select(con,'select w_id from Workouts order by w_id desc limit 1')[0][0]
         for i, e_id in enumerate(exercise_ids):
-            # Берем из списков элементы, которые стоят на той же позиции (i), что и текущее упражнение
             current_sets = int(sets_count[i]) if sets_count[i] != "" else 1
             current_weight = float(weight[i]) if weight[i] != "" else None
             sql.insert(con, 'Exercises_list', [w_id, e_id, current_sets, current_weight])
@@ -373,76 +361,83 @@ async def delete_template(template_id: Optional[int] = Form(None), current_user 
 
         user = workout[0][2]
         if user != current_user:
-            print(f"ОШИБКА: Доступ запрещен! Шаблон принадлежит юзеру {user}, а пытается удалить {current_user}")
+            print(f"ОШИБКА: Доступ запрещен! Шаблон принадлежит пользователю {user}, а пытается удалить {current_user}")
             con.close()
             raise
     except Exception as e:
         con.close()
-        print(e, template_id)
         return RedirectResponse(url=f"/", status_code=303)
     sql.delete(con, 'Exercises_list', f"where el_workout = {template_id}")
     sql.delete(con, 'Workouts', f"where w_id = {template_id}")
     con.close()
     return RedirectResponse(url=f"/templates", status_code=303)
 
-@app.get("/exercises", response_class=HTMLResponse)
-async def delete_template(request: Request, current_user = Depends(get_cookie_user)):
-    con = sql.connection()
-    exercises = sql.select(con,
-                          f'SELECT e_id, e_name, m_name, e_user FROM Exercises '
-                          f'join Muscle_groups on Muscle_groups.m_id = Exercises.e_muscle'
-                          f' WHERE e_user = {current_user} or e_user = 1')
-    con.close()
-    exercises_list = []
-    for row in exercises:
-        exercises_list.append({
-            "id": row[0],
-            "name": row[1],
-            "muscle": row[2],
-            "u_id": row[3]
-        })
-    print(exercises_list)
-    return templates.TemplateResponse(request=request, name="exercises.html", context={"exercises": exercises_list})
+### Упражнения
 
+@app.get("/exercises", response_class=HTMLResponse)
+async def get_exercises_page(request: Request, current_user=Depends(get_cookie_user)):
+    con = sql.connection()
+
+    exercises = sql.select(con,
+                           f"SELECT e_id, e_name, e_user FROM Exercises WHERE e_user = {current_user} OR e_user = 1"
+                           )
+
+    exercises_list = []
+
+    for row in exercises:
+        e_id, e_name, e_user = row[0], row[1], row[2]
+
+        muscle_rows = sql.select(con, f"""
+            SELECT m_name 
+            FROM Muscle_groups
+            JOIN Muscles_list ON Muscle_groups.m_id = Muscles_list.ml_muscle
+            WHERE ml_exercises = {e_id}
+        """)
+
+        muscle_names = [m[0] for m in muscle_rows]
+
+        exercises_list.append({
+            "id": e_id,
+            "name": e_name,
+            "muscles": muscle_names,
+            "u_id": e_user
+        })
+
+    con.close()
+    return templates.TemplateResponse(request=request, name="exercises.html", context={"exercises": exercises_list})
 
 @app.get("/exercises/edit", response_class=HTMLResponse)
 async def get_exercises_edit(request: Request, current_user=Depends(get_cookie_user),
                              exercise_id: Optional[str] = None):
     con = sql.connection()
 
-    # Инициализация переменных
-    exercise = None
     workouts_list = []
-    e_name = e_description = e_user = e_muscle = None
+    e_name = e_description = e_user = muscle_ids_str = None
     e_edit = "Создать"
 
     if exercise_id is not None:
-        # 1. Получаем упражнение (используем параметризацию)
         data = sql.select(con,
-                          f"SELECT e_name, e_description, e_muscle, e_user FROM Exercises WHERE e_id = {exercise_id}")
-        print(data)
+                          f"SELECT e_name, e_description, e_user FROM Exercises WHERE e_id = {exercise_id}")
         if not data:
             con.close()
             return RedirectResponse(url="/", status_code=303)
 
         row = data[0]
 
-        # Проверка прав: если это не админ и не владелец — редирект
-        if current_user != 1 and row[3] != current_user and row[3] != 1:
-            print(current_user, row[3])
+        if current_user != 1 and row[2] != current_user and row[2] != 1:
             con.close()
             return RedirectResponse(url="/", status_code=303)
 
-        e_name, e_description, e_muscle, e_user = row
+        e_name, e_description, e_user = row
         e_edit = "Изменить"
 
-        # 2. Получаем связанные шаблоны
         workouts = sql.select(con, f"""SELECT w_id, w_name FROM Exercises_list
                                     JOIN Workouts ON Exercises_list.el_workout = Workouts.w_id
                                     WHERE el_exercises = {exercise_id} AND w_user = {current_user}""")
         workouts_list = [{"id": r[0], "name": r[1]} for r in workouts]
+        muscle_list = sql.select(con, f"SELECT ml_muscle FROM Muscles_list where ml_exercises = {exercise_id}")
+        muscle_ids_str = ",".join([str(m[0]) for m in muscle_list]) if muscle_list else ""
 
-    # 3. Группы мышц
     muscle_groups = sql.select(con, "SELECT m_id, m_name FROM Muscle_groups")
     all_muscle_groups = [{"id": r[0], "name": r[1]} for r in muscle_groups]
 
@@ -453,7 +448,7 @@ async def get_exercises_edit(request: Request, current_user=Depends(get_cookie_u
         'e_edit': e_edit,
         'e_name': e_name,
         'e_description': e_description,
-        'e_muscle': e_muscle,
+        'e_muscle': muscle_ids_str,
         'e_user': e_user,
         'user_id': current_user,
         "related_workouts": workouts_list,
@@ -461,21 +456,37 @@ async def get_exercises_edit(request: Request, current_user=Depends(get_cookie_u
     })
 
 @app.post("/exercises/edit", response_class=HTMLResponse)
-async def edit_template(request: Request,
+async def edit_exercises(request: Request,
     e_name: str = Form(min_length=3, max_length=30),
     e_description: Optional[str] = Form(None),
     exercises_id: Optional[int] = Form(None),
-    e_muscle: Optional[int] = Form(None),
+    e_muscle: Optional[str] = Form(None),
     current_user = Depends(get_cookie_user)):
     con = sql.connection()
-    print(exercises_id)
     if exercises_id:
-        sql.update(con,'Exercises','e_name', e_name,
-                   f", e_description = '{e_description}', e_muscle = {e_muscle} WHERE e_id = {exercises_id}")
+        sql.update(con, 'Exercises', 'e_name', e_name,
+                   f", e_description = '{e_description}', e_muscle = 0 WHERE e_id = {exercises_id}")
+
+        target_exercise_id = exercises_id
+
+        sql.delete(con, f"DELETE FROM Muscles_list WHERE _exercises = {target_exercise_id}")
     else:
-        sql.insert(con, 'Exercises',[e_name, e_muscle, e_description, current_user])
+        sql.insert(con, 'Exercises', [e_name, e_description, current_user])
+
+        target_exercise_id = sql.select(con, 'select e_id from Exercises order by e_id DESC limit 1')[0][0]
+
+    print(e_muscle, target_exercise_id)
+    if e_muscle and target_exercise_id:
+        muscle_ids = [int(m_id) for m_id in e_muscle.split(',') if m_id.strip()]
+        print(muscle_ids)
+
+        for m_id in muscle_ids:
+            sql.insert(con, 'Muscles_list', [m_id, target_exercise_id])
+
     con.close()
     return RedirectResponse(url=f"/exercises", status_code=303)
+
+### Календарь
 
 @app.get("/calendar", response_class=HTMLResponse)
 async def get_calendar_page(request: Request, current_user = Depends(get_cookie_user)):
@@ -516,7 +527,6 @@ async def update_conducting_workouts(status: bool = Form(None), id: int = Form(N
 async def add_conducting_workouts(request: Request, date: str = Form(...),
     template_id: int = Form(...), current_user = Depends(get_cookie_user)):
     con = sql.connection()
-    print(template_id, date, False,'\nZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ')
     sql.insert(con, 'conducting_workouts', [template_id, date, False])
     con.close()
     return RedirectResponse(url=f"/calendar", status_code=303)
