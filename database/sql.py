@@ -89,7 +89,3 @@ def delete_all_db(con):
                              DELETE FROM Muscles_list""")
     con.commit()
     print('Отчистка произведена')
-
-delete(connection(),'Muscles_list')
-delete(connection(),'Exercises')
-delete(connection(),'Muscle_groups')
